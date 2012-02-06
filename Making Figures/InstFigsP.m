@@ -1,4 +1,4 @@
-function [ A1, A2, Xs, Ys ] = MeanFigsP( MeanName , S, Shift, TitleText, FileName,A1,A2)
+function [ A1, A2, Xs, Ys ] = InstFigsP(ImgNo, MeanName , S, Shift, TitleText, FileName,A1,A2)
 
 %Intilize Figure
     Figure1=figure(1);
@@ -11,7 +11,8 @@ function [ A1, A2, Xs, Ys ] = MeanFigsP( MeanName , S, Shift, TitleText, FileNam
 subplot(2,2,1)
 mean2=0;  %need to intialize or gets confused with a funciton :/
 load(['Vars/ProcMeansE' MeanName]);
-    mean1=fliplr(mean1');mean2=fliplr(mean2');
+load(['ProcImgs/Proc' sprintf('%05d', ImgNo)]);
+    mean1=fliplr(C1');mean2=fliplr(C2');
     [y x]=size(mean1);
     
     Xs=(x:-1:1)./Scale+Shift; %shift estimated from Focus 18 img.
@@ -36,14 +37,14 @@ load(['Vars/ProcMeansE' MeanName]);
     Img=ColorChangeWhite(mean1,mean2,2);
     imshow(Img,'XData',Xs,'YData',Ys);
     hold on;axis on;
-        plot(Xs(X1)+5.*mean(mean1(:,(X1-Sixth):(X1+Sixth) ),2),Ys,'r-.','LineWidth',1.5);
-        plot(Xs(X1)+5.*mean(mean2(:,(X1-Sixth):(X1+Sixth) ),2),Ys,'b-.','LineWidth',1.5);
+    %    plot(Xs(X1)+5.*mean(mean1(:,(X1-Sixth):(X1+Sixth) ),2),Ys,'r-.','LineWidth',1.5);
+    %    plot(Xs(X1)+5.*mean(mean2(:,(X1-Sixth):(X1+Sixth) ),2),Ys,'b-.','LineWidth',1.5);
 
-        plot(Xs(X2)+5.*mean(mean1(:,(X2-Sixth):(X2+Sixth) ),2),Ys,'r-.','LineWidth',1.5);
-        plot(Xs(X2)+5.*mean(mean2(:,(X2-Sixth):(X2+Sixth) ),2),Ys,'b-.','LineWidth',1.5);
+    %    plot(Xs(X2)+5.*mean(mean1(:,(X2-Sixth):(X2+Sixth) ),2),Ys,'r-.','LineWidth',1.5);
+    %    plot(Xs(X2)+5.*mean(mean2(:,(X2-Sixth):(X2+Sixth) ),2),Ys,'b-.','LineWidth',1.5);
 
-        plot(Xs(X3)+5.*mean(mean1(:,(X3-Sixth):(X3+Sixth) ),2),Ys,'r-.','LineWidth',1.5);
-        plot(Xs(X3)+5.*mean(mean2(:,(X3-Sixth):(X3+Sixth) ),2),Ys,'b-.','LineWidth',1.5);
+     %   plot(Xs(X3)+5.*mean(mean1(:,(X3-Sixth):(X3+Sixth) ),2),Ys,'r-.','LineWidth',1.5);
+     %   plot(Xs(X3)+5.*mean(mean2(:,(X3-Sixth):(X3+Sixth) ),2),Ys,'b-.','LineWidth',1.5);
         
         plot(Xs,ones(1,length(Xs))*S/2,'k--','LineWidth',1.5);
         plot(Xs,-ones(1,length(Xs))*S/2,'k--','LineWidth',1.5);
@@ -121,9 +122,9 @@ annotation(Figure1,'textbox',...
     'Interpreter','latex','FontSize',18,...
     'HorizontalAlignment','center');
 
-FileName=[FileName 'Means.tif'];
+FileName=[FileName 'Inst.tif'];
 print('-r500','-dtiff',FileName);
 
-save('Vars/MeanPlots','Mean1P','Mean2P','RMSE1P','RMSE2P','CovP','C1C2P','Xs','Ys');
+%save('Vars/MeanPlots','Mean1P','Mean2P','RMSE1P','RMSE2P','CovP','C1C2P','Xs','Ys');
 end
 

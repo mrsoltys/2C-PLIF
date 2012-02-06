@@ -48,7 +48,7 @@ load(['Vars/ProcMeansE' MeanName]);
         plot(Xs,ones(1,length(Xs))*S/2,'k--','LineWidth',1.5);
         plot(Xs,-ones(1,length(Xs))*S/2,'k--','LineWidth',1.5);
     hold off;
-    axis([Xs(length(Xs)) Xs(1) -8 8]);
+    axis([Xs
     title('$\frac{\left< C_1 \right>}{\left< C_1 \right>_C}$ and $\frac{\left< C_2 \right>}{\left< C_2 \right>_C}$','Interpreter','latex','FontSize',12)
 
     Mean1P=mean(mean1,2);
