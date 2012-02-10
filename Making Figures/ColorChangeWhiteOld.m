@@ -1,4 +1,4 @@
-function CombImg = ColorChangeWhite(Img1, Img2, Scale)
+function CombImg = ColorChangeWhiteOld(Img1, Img2, Scale)
 %-------------------------------------------------------------------------%
 %ColorChangeWhite(Img2, Img1, Scale)
 %Inputs:
@@ -43,11 +43,11 @@ else
 end
 
  %Red
-    CombImg(:,:,1)=1-Img1;
+    CombImg(:,:,1)=1+(Img2-Img1);
  %Blue
-    CombImg(:,:,3)=1-Img2;
+    CombImg(:,:,3)=1+(Img1-Img2);
  %Green
-    CombImg(:,:,2)=1-(Img1+Img2);
+    CombImg(:,:,2)=1-max(Img1,Img2);
 
 CombImg=real(CombImg);
 

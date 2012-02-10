@@ -47,7 +47,7 @@ end
  %Blue
     CombImg(:,:,3)=1-Img2;
  %Green
-    CombImg(:,:,2)=1-(Img1+Img2);
+    CombImg(:,:,2)=1-(Img1.^(1/Scale)+Img2.^(1/Scale));
 
 CombImg=real(CombImg);
 
