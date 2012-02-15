@@ -1,4 +1,32 @@
 function FindRmsCovE(Direct, Start, Stop,eps)
+%--------------------------------------------------------------------------------%
+% FindRmsCovE
+% Finds the Root Mean Square Error, Covariance <c1c2>, and Reaction Product <C1C2> 
+% of a series of processed images, filtered with some threhold value
+% denoted by epsilon (eps).  For example, if data is scaled from 0-1 and eps is .01,
+% All data below 0.01 will be set to zero.
+%
+% To calculate the stats of mulitple data ranges, set start and stop to vectors
+% containing the ranges.  Example, to find the stats of images 1-10 and 35-70, call
+% FindRmsCovE(Direct,[1 35],[10 70],eps)
+%
+% Direct is the directory path to find the stats for.  If your current path is the
+% correct Directory, set path to: ''
+%
+% Dependancies: 
+% FindRmsCovE requires a directy of Processed Images located at ProcImgs/Proc****.m
+% FindRmsCovE requires that the means already have been claculated, and stored in a file
+% named as: 
+% [Direct 'Vars/ProcMeansE'  sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))]
+%
+% Output:
+% Wil save two files, one named 
+% [Direct 'Vars/CovE' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))]
+% containing <C1C2> and <c1c2> and another named
+% [Direct 'Vars/RMSEe' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))]
+% containing the variances for each.
+
+%--------------------------------------------------------------------------------%
 disp(['Finding <c1c2> for ' int2str(Start) '-' int2str(Stop)]);
 
 load([Direct 'Vars/ProcMeansE'  sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'mean1', 'mean2');
