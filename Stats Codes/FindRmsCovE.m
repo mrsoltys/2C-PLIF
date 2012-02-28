@@ -4,7 +4,8 @@ function FindRmsCovE(Direct, Start, Stop,eps)
 % Finds the Root Mean Square Error, Covariance <c1c2>, and Reaction Product <C1C2> 
 % of a series of processed images, filtered with some threhold value
 % denoted by epsilon (eps).  For example, if data is scaled from 0-1 and eps is .01,
-% All data below 0.01 will be set to zero.
+% All data below 0.01 will be set to zero.  if no eps is defined, eps is
+% set to -Inf
 %
 % To calculate the stats of mulitple data ranges, set start and stop to vectors
 % containing the ranges.  Example, to find the stats of images 1-10 and 35-70, call
@@ -27,6 +28,10 @@ function FindRmsCovE(Direct, Start, Stop,eps)
 % containing the variances for each.
 
 %--------------------------------------------------------------------------------%
+    if nargin == 3
+        eps = -Inf;
+    end
+
 disp(['Finding <c1c2> for ' int2str(Start) '-' int2str(Stop)]);
 
 load([Direct 'Vars/ProcMeansE'  sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'mean1', 'mean2');
