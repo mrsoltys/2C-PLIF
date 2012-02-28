@@ -41,8 +41,8 @@ end
 %xbin, ybin zero for out of range values 
 % (see the help of histc) force this event to the 
 % first bins
-xbin(find(xbin == 0)) = 1;
-ybin(find(ybin == 0)) = 1;
+xbin(find(xbin == 0)) = inf;
+ybin(find(ybin == 0)) = inf;
 
 xnbin = length(xedges);
 ynbin = length(yedges);
@@ -57,7 +57,10 @@ end
 
 %[xyuni, m, n] = unique(xy);
 xyuni = unique(xy);
+xyuni(end) = []; 
 hstres = histc(xy,xyuni);
-histmat = zeros(xnbin,ynbin);
+clear xy;
+
+histmat = zeros(ynbin,xnbin);
 histmat(xyuni-indexshift) = hstres;
-histmat = histmat';
+
