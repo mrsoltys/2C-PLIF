@@ -1,8 +1,14 @@
-function ParTransProc(Direct,Start, Stop, BackStart, BackStop, AddCrop)
+function ParTransProc(Direct,Start, Stop, BackStart, BackStop, AddCrop, Lambda)
 %Make Directorys
 mkdir([Direct 'ProcImgs']);
 %mkdir([Direct 'ComboImgs']);
 %mkdir([Direct 'PurpImgs']);
+
+    if nargin == 6
+        load([Direct 'Vars/Lambdas'],'Lambda1','Lambda2');
+    else
+        load([Direct 'Vars/' Lambda],'Lambda1','Lambda2');
+    end
 
 %Load Vars
 load([Direct 'Vars/PreRunVars.mat'], 'C1Dir', 'C2Dir', 'SetStart',  'TFORM1','TFORM2', 'Size', 'Cs');
@@ -12,12 +18,11 @@ load([Direct 'Vars/PreRunVars.mat'], 'C1Dir', 'C2Dir', 'SetStart',  'TFORM1','TF
     D1=I1; D2=I2;
         
 %Load Lambda    
-load([Direct 'Vars/Lambdas'],'Lambda1','Lambda2');
+
 %load([Direct 'Vars/Lambdas' sprintf('%05d', Stop)],'Lambda1','Lambda2');
 Lambda1=Lambda1;
 Lambda2=Lambda2;
 
-disp(['Processing Imgs ' int2str(Start) '-' int2str(Stop)]);
     load([Direct 'Vars/TransAvg' BackStart])
     B1a=I1; B2a=I2;
     
@@ -50,22 +55,12 @@ disp(['Translating and Processing Imgs ' int2str(Start) '-' int2str(Stop)]);
         
         [C1, C2] = ParTransCropImg(Direct, Name1, Name2, TFORM1, TFORM2, AddCrop, B1, B2, D1, D2, Lambda1, Lambda2, i)                     
 
-        %I1means(i)=mean(C1(:));
-        %I1stdev(i)=std(C1(:));
-        %I2means(i)=mean(C2(:));
-        %I2stdev(i)=std(C2(:));
-        I1max(i,:)=max(C1);
+        %Gather the maximum concnetnration from each column
+        I1max(i,:)=max(C1); 
         I2max(i,:)=max(C2);
     end
 
-    %I1means=I1means(Start:Stop); 
-    %I2means=I2means(Start:Stop); 
-    %I1stdev=I1stdev(Start:Stop); 
-    %I2stdev=I2stdev(Start:Stop); 
     I1max=I1max(Start:Stop,:);
     I2max=I2max(Start:Stop,:);
     
-save([Direct 'Vars/Istats' sprintf('%05d', Stop)], 'I1max', 'I2max');%'I1means', 'I2means', 'I1stdev', 'I2stdev');
-
-%SaveVars
-    %save([Direct 'Vars/ProcImgVars' int2str(Stop)], 'C1Scale', 'C2Scale');
+    save([Direct 'Vars/ProcMaxs' sprintf('%05d', Stop)], 'I1max', 'I2max');

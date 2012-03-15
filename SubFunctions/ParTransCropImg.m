@@ -29,7 +29,8 @@ function [C1,C2] = ParTransCropImg(Direct, Name1, Name2, TFORM1, TFORM2, AddCrop
                     (B2-D2-Lambda1.*(B1-D1)) );           
             
         %Save Processed Images
-        save([Direct 'ProcImgs/Proc' sprintf('%05d', i)],'-v7.3','C1','C2');%,'C1C2');    
+        b1=1;b2=1;
+        save([Direct 'ProcImgs/Proc' sprintf('%05d', i)],'-v7.3','C1','C2','b1','b2');%,'C1C2');    
             
 end
  
