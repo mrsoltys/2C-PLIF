@@ -51,7 +51,11 @@ function ParTrans(Direct, Start, Stop, AddCrop)
     TFORM1=TFORM1;
     TFORM2=TFORM2;
     %%Note, need to normalize the cropping by cs
-    AddCrop=AddCrop+Cs;
+    %%Note, need to normalize the cropping by cs
+    AddCrop(1)=Cs(1)+AddCrop(1);
+    AddCrop(2)=Cs(2)-AddCrop(2);
+    AddCrop(3)=Cs(3)+AddCrop(3);
+    AddCrop(4)=Cs(4)-AddCrop(4);
 
     disp(['Translating Imgs ' int2str(Start) '-' int2str(Stop)]);
 %% Start parfor to trans and crop each image

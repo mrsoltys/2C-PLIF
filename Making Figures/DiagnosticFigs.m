@@ -1,7 +1,10 @@
-function [ A1, A2, Xs, Ys ] = DiagnosticFigs( MeanName , Shift, TitleText,angle)
+function [ A1, A2, Xs, Ys ] = DiagnosticFigs( MeanName , Shift, TitleText,angle,eps)
 
     if nargin == 3
         angle = 0;
+        eps = -Inf;
+    elseif nargin == 4
+        eps = -Inf;        
     end
 
 %Intilize Figure
@@ -11,33 +14,32 @@ function [ A1, A2, Xs, Ys ] = DiagnosticFigs( MeanName , Shift, TitleText,angle)
     set(Figure1,'defaulttextinterpreter','latex')
     load('Vars/PreRunVars.mat','Scale')
 
-%First Plot: Means
-subaxis(2,2,1,'Spacing', 0.05, 'Padding', 0.05, 'Margin', .03);
-mean2=0;  %need to intialize or gets confused with a funciton :/
-load(['Vars/ProcMeansE' MeanName]);
-mean1=imrotate(mean1,angle);
-mean2=imrotate(mean2,angle);
+%Load Means
+    subaxis(2,2,1,'Spacing', 0.05, 'Padding', 0.05, 'Margin', .03);
+    mean2=0;  %need to intialize or gets confused with a funciton :/
+    load(['Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' MeanName]);
+        mean1=imrotate(mean1,angle);
+        mean2=imrotate(mean2,angle);
     
+%Figure out Dimentional Xs and Ys    
     [y x]=size(mean1);
-    
     Xs=(x:-1:1)./Scale+Shift; %shift estimated from Focus 18 img.
     Ys=(y:-1:1)./Scale;
-    
+
+%and where to take slices
     X1=ceil(x/6)+1;
     X2=round(x/2);
     X3=floor(5*x/6)-1;
     Sixth=floor(x/6);
-    
+
+%Fit gaussians to mean, use these to find centerpoint and spacing    
     [sigma1,mu1,A1]=mygaussfit(Ys,mean(mean1,2));
     [sigma2,mu2,A2]=mygaussfit(Ys,mean(mean2,2));
-    
-    %mean1=mean1/A1;
-    %mean2=mean2/A2;
-    
+
     S=abs(mu1-mu2);
     Ys=Ys-(mu1+mu2)/2;
-    
-    
+
+%Plot Means w/ slices
     Img=ColorChangeWhite(mean1,mean2,.5);
     imshow(Img,'XData',Xs,'YData',Ys);
     hold on;axis on;
@@ -60,11 +62,11 @@ mean2=imrotate(mean2,angle);
     title('$\left< C_1 \right>$ and $\left< C_2 \right>$','Interpreter','latex','FontSize',12)
 
 subaxis(2,2,3,'Spacing', 0.05, 'Padding', 0.05, 'Margin', .03);
-load(['Vars/CovE' MeanName]);
+load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' MeanName]);
 C1C2=imrotate(C1C2,angle);
 Cov=imrotate(Cov,angle);
     Mix=Cov./C1C2;
-    imagesc(Xs,Ys,Mix);axis image;
+    imagesc(Xs,Ys,Mix);axis image;caxis([-1 1]);
     B(1,:)= [0:1/31:1 ones(1,32)]; B(2,:)= [0:1/31:1 1:-1/31:0]; B(3,:)= [ones(1,32) 1:-1/31:0];
     colormap(B');caxis([-1 1]);freezeColors;cbfreeze(colorbar('location','South'));
 
@@ -75,7 +77,7 @@ subaxis(2,2,2,'Spacing', 0.05, 'Padding', 0.05, 'Margin', .03);
     Start = str2num( MeanName(1:5) );
     Stop  = str2num( MeanName(7:11) );
 
-    load(['ProcImgs/Proc' sprintf('%05d', round((Stop+Start)/3))]);
+    load(['ProcImgs/Proc' sprintf('%05d', round((Stop+Start)/2))]);
         C1=imrotate(C1,angle);
         C2=imrotate(C2,angle);
     Img=ColorChangeWhite(C1,C2,.75);

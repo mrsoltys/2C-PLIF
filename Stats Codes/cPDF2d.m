@@ -1,5 +1,7 @@
-function FindMeanE(Direct, Start, Stop,eps)
+function N=cPDF2d(Direct, Start, Stop, Xpts, Ypts, Box, eps)
 %--------------------------------------------------------------------------------%
+% Note Box is [r c]
+%
 % FindMeanE 
 % Finds the mean of a series of processed images, filtered with some threhold value
 % denoted by epsilon (eps).  For example, if data is scaled from 0-1 and eps is .01,
@@ -22,32 +24,46 @@ function FindMeanE(Direct, Start, Stop,eps)
 % [Direct 'Vars/ProcMeansE' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))]
 % containing matricies for mean1 and mean2.
 %--------------------------------------------------------------------------------%
-    if nargin == 3
+    if nargin == 6
         eps = -Inf;
     end
-Prefix=[Direct 'Vars/Eps' sprintf('%.3f', eps)];
-mkdir(Prefix);
+mean2=0;
 
-
-disp(['Finding mean for ' int2str(Start) '-' int2str(Stop)]);
-
+disp(['Finding 2D PDF for ' int2str(Start) '-' int2str(Stop)]);
 load([Direct 'ProcImgs/Proc' sprintf('%05d', Start(1))],'C1','C2')   %Proc Mean
-                                                          
-mean1=zeros(size(C1));
-mean2=zeros(size(C2));
+load(['Vars/ProcMeansE' sprintf('%05d', Start(1)) '-'  sprintf('%05d', Stop(length(Stop)))]);
+
+Box(2)=floor(Box(2)/2);
+Box(1)=floor(Box(1)/2);
+
+
+%[Nr Nc]=size(C1);
+
+Centers=-1:.01:1;
+Cs(1)={Centers};
+Cs(2)={Centers};
+
+N=zeros(length(Centers), length(Centers), length(Xpts), length(Ypts));
 
 ind=1;
 i=Start(ind);
 while ind<=length(Start)
-    load([Direct 'ProcImgs/Proc' sprintf('%05d', i)],'C1','C2')
-    C1(C1<=eps)=0;
-    C2(C2<=eps)=0;
-    mean1=mean1+C1;
-    mean2=mean2+C2;
-    
-    %Display Progress
-%    stopBar= progressbar((i-Start+1)/(Stop-Start),5);
-%       if (stopBar) break; end
+     load([Direct 'ProcImgs/Proc' sprintf('%05d', i)],'C1','C2')
+    % create histogram for each Box
+    for X=1:length(Xpts)
+        for Y=1:length(Ypts)
+            l=Xpts(X)-Box(2);
+            r=Xpts(X)+Box(2);
+            b=Ypts(Y)-Box(1);
+            t=Ypts(Y)+Box(1);
+            
+            C1s=C1(b:t,l:r)-mean1(b:t,l:r);
+            C2s=C2(b:t,l:r)-mean2(b:t,l:r);
+            Nt(:,:,X,Y)=hist3([C1s(:),C2s(:)],Cs); %will C always be the same? Only if i send it an an edges specifier..
+        end
+    end
+    % Add Nt (temp hist for each column of image) to N 
+    N=N+Nt;
     
     if i==Stop(ind)
         ind=ind+1;
@@ -59,9 +75,6 @@ while ind<=length(Start)
     end
 end
 
-mean1=mean1./(sum(Stop-Start)+length(Start));
-mean2=mean2./(sum(Stop-Start)+length(Start));
+save([Direct 'Vars/cPDF2d' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'N','Cs');   %Proc Mean
 
-save([Prefix '/ProcMeansE' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'mean1', 'mean2');   %Proc Mean
-FindRmsCovE(Direct, Start, Stop,eps)
-end
+ 

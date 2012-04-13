@@ -32,9 +32,11 @@ function FindRmsCovE(Direct, Start, Stop,eps)
         eps = -Inf;
     end
 
+Prefix=[Direct 'Vars/Eps' sprintf('%.3f', eps)];
+
 disp(['Finding <c1c2> for ' int2str(Start) '-' int2str(Stop)]);
 
-load([Direct 'Vars/ProcMeansE'  sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'mean1', 'mean2');
+load([Prefix '/ProcMeansE'  sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'mean1', 'mean2');
 
 Cov=zeros(size(mean1));
 C1C2=Cov;
@@ -46,8 +48,8 @@ ind=1;
 i=Start(ind);
 while ind<=length(Start)
     load([Direct 'ProcImgs/Proc' sprintf('%05d', i)],'C1','C2');
-        C1=C1.*(C1>=eps);
-        C2=C2.*(C2>=eps);
+        C1(C1<=eps)=0;
+        C2(C2<=eps)=0;
 
     RMSE1=RMSE1+(C1-mean1).^2;
     RMSE2=RMSE2+(C2-mean2).^2;
@@ -70,6 +72,6 @@ Cov=Cov./(sum(Stop-Start)+length(Start));
 RMSE1=sqrt(RMSE1./(sum(Stop-Start)+length(Start)));
 RMSE2=sqrt(RMSE2./(sum(Stop-Start)+length(Start)));
 
-save([Direct 'Vars/CovE' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'Cov', 'C1C2');
-save([Direct 'Vars/RMSEe' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'RMSE1', 'RMSE2');
+save([Prefix '/CovE'  sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'Cov', 'C1C2');
+save([Prefix '/RMSEe' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'RMSE1', 'RMSE2');
 end
