@@ -1,4 +1,4 @@
-function [ Lambda1, Lambda2 ] = FindLambdaSSE(Direct, Start, Stop, BackStart, BackStop)
+function [ Lambda1, Lambda2 ] = FindLambdaSSEmeans(Direct, Start, Stop, BackStart, BackStop)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %[ Lambda1, Lambda2 ] = FindLambdaSSE(Direct, Start, Stop, BackStart, BackStop)
@@ -23,6 +23,9 @@ disp(['Finding Lambda Using Imgs ' int2str(Start) '-' int2str(Stop)]);
 % Load Dark Response
     load([Direct 'Vars/TransAvgDark'], 'I1', 'I2');
         D1=I1; D2=I2;
+        
+        I1m=zeros(size(D1));
+        I2m=zeros(size(D2));
 
 %% Find Lambda for Each Individual Image
 for i=Start:Stop
@@ -33,12 +36,15 @@ for i=Start:Stop
         load([Direct 'TransImgs/Trans'  sprintf('%05d', i)],'I1','I2');
 
     % Convert to Double
-        I1=double( I1 );
-        I2=double( I2 );
+        I1m=I1m+double( I1 );
+        I2m=I2m+double( I2 );
+end
         
     % Calc Background for image i
-        B1=B1a*(Stop-i)/(Stop-Start) + B1b*(i-Start)/(Stop-Start);
-        B2=B2a*(Stop-i)/(Stop-Start) + B2b*(i-Start)/(Stop-Start);
+        B1=(B1a+B1b)./2;
+        B2=(B1a+B1b)./2;
+        
+       
         
     % Find Threshold values for each image
         % Histogram with 200 Bins
@@ -68,8 +74,8 @@ for i=Start:Stop
         %background (Mean+3.290527?) = 99.9% outside of noise and the 99.9%
         %of maximum in the image. For now, I'll put it halfway between, but
         %it might be better somewhere closer to the noise than the maximum.
-        LowThresh1=(3*(mean2(B1)+3.3*std2(B1))+HiThresh1)/4;
-        LowThresh2=(3*(mean2(B2)+3.3*std2(B2))+HiThresh2)/4;
+        LowThresh1=(mean2(B1)+3.3*std2(B1)+HiThresh1)/2;
+        LowThresh2=(mean2(B2)+3.3*std2(B2)+HiThresh2)/2;
         
         %Make filter matrix that is 1 everywhere that I1>LowThresh and NaN
         %everywhere else.
@@ -78,13 +84,12 @@ for i=Start:Stop
             %Note: I should make it so if the filters both contain 1's in
             %the same pixel (overlap?) it removes those points (sets to
             %nans)
-       % Overlap=double(( (filter1+filter2)>0 )==0 )./...
-       %         double(( (filter1+filter2)>0 )==0 );
-       % filter1=filter1.*Overlap;
-       % filter2=filter2.*Overlap;
+        Overlap=double(( (filter1+filter2)>0 )==0 )./...
+                double(( (filter1+filter2)>0 )==0 );
+        filter1=filter1.*Overlap;
+        filter2=filter2.*Overlap;
     %% Find Lambda1         
-       % if( ( mean2(I1) > (mean2(B1)-3*std2(B1)) ) && ( mean2(I1)< (mean2(B1)+3*std2(B1)) ) )
-        if( ( (mean2(I1)+.5*std2(I1)) > (mean2(B1)-3*std2(B1)) ) && ( (mean2(I1)+.5*std2(I1))< (mean2(B1)+3*std2(B1)) ) )
+        if( ( mean2(I1) > (mean2(B1)-3*std2(B1)) ) && ( mean2(I1)< (mean2(B1)+3*std2(B1)) ) )
             % if the image is a blank (the mean  +- 2 std dev of
             % the back mean) then skip it and set the Lambda to zero
             L1=NaN;
@@ -154,8 +159,7 @@ for i=Start:Stop
 
   %% Find Lambda2
         
-        %if( ( mean2(I2) > (mean2(B2)-3*std2(B2)) ) && ( mean2(I2)< (mean2(B2)+3*std2(B2)) ) )
-        if( ( (mean2(I2)+.5*std2(I2)) > (mean2(B2)-3*std2(B2)) ) && ( (mean2(I2)+.5*std2(I2))< (mean2(B2)+3*std2(B2)) ) )
+        if( ( mean2(I2) > (mean2(B2)-3*std2(B2)) ) && ( mean2(I2)< (mean2(B2)+3*std2(B2)) ) )
             % if the image is a blank (the mean  +- 2 std dev of
             % the back mean) then skip it and set the Lambda to zero
             L2=NaN;
@@ -229,7 +233,7 @@ for i=Start:Stop
             progressbar((i-Start+1)/(Stop-Start+1),5);
             %if (stopBar) break; end
 
-end
+
 Lambda1=trimmean(Lambdas1,20)
 Lambda2=trimmean(Lambdas2,20)
 

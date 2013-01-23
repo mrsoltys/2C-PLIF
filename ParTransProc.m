@@ -7,7 +7,7 @@ mkdir([Direct 'ProcImgs']);
     if nargin == 6
         load([Direct 'Vars/Lambdas'],'Lambda1','Lambda2');
     else
-        load([Direct 'Vars/' Lambda],'Lambda1','Lambda2');
+        load([Lambda],'Lambda1','Lambda2');
     end
 
 %Load Vars

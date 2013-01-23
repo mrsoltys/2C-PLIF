@@ -11,10 +11,10 @@ i=Start(ind);
 while ind<=length(Start)
     load(['ProcImgs/Proc' sprintf('%05d', i)],'C1','C2','b1','b2')   %Proc Mean
     
-    C1=C1*b1/sc1;
-    C2=C2*b2/sc2;
+    C1=C1*sc1;
+    C2=C2*sc2;
     
-    b1=sc1;b2=sc2;
+    b1=b1*sc1;b2=b2*sc2;
     save(['ProcImgs/Proc' sprintf('%05d', i)],'C1','C2','b1','b2')   %Proc Mean
     
     if i==Stop(ind)

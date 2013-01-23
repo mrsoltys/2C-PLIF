@@ -173,7 +173,10 @@ disp('Average Each Set');
 disp('Finding Focus Imgage')
     FocusInd=[];
     for i=1:length(SetStart)
-        Foc=findstr('Focus',C1Dir(SetStart(i)).name)
+        Foc=findstr('Focus',C1Dir(SetStart(i)).name);
+        if  isempty(Foc)
+            Foc=findstr('focus',C1Dir(SetStart(i)).name);
+        end
         if  ~isempty(Foc)
             FocusInd=SetStart(i); break;
         end

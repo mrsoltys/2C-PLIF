@@ -1,70 +1,114 @@
-function N=PDF2d(Direct, Start, Stop, Xpts, Ypts, Box, eps)
+function [JPDFs]=PDF2d(Direct, Start, Stop, JPDFs, Box, eps)
 %--------------------------------------------------------------------------------%
 % Note Box is [r c]
 %
-% FindMeanE 
-% Finds the mean of a series of processed images, filtered with some threhold value
-% denoted by epsilon (eps).  For example, if data is scaled from 0-1 and eps is .01,
-% All data below 0.01 will be set to zero. If no eps is defined, eps is set
-% to -Inf
+% PDF2d(Direct, Start, Stop, JPDFs, Box, eps, exp)
+% Inputs:
+%   Direct is the directory path to find the means for.  If your current path is the
+%       correct Directory, set path to: ''
+%   Start is the image number to start calculating PDF for
+%   Stop is the image number to stop calculating PDF for
+%   JPDFs is a NxM struct with the required fields:
+%       Xpix and Ypix refering to the pixel coordnate each JPDF should be
+%       calculated for.
+%       Loc with location 1 for 'US' or 2 for 'DS,' etc.
+%   eps - noise filter, default is set to -Inf
 %
-% To calculate the means of mulitple data ranges, set start and stop to vectors
-% containing the ranges.  Example, to find the mean of images 1-10 and 35-70, call
-% FindMeanE(Direct,[1 35],[10 70],eps)
-%
-% Direct is the directory path to find the means for.  If your current path is the
-% correct Directory, set path to: ''
-%
-% Dependancies: 
-% FindMeanE requires a directy of Processed Images located at ProcImgs/Proc****.m
 %
 % output:
-% FindMeanE will return the mean in a matrix the same size and C1 and C2.
+% FindMeanE will return the struct JPDFs with a 101x101 matrix containing 
+% the JPDF of C1 adn C2
 % the function will also output a file named
-% [Direct 'Vars/ProcMeansE' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))]
-% containing matricies for mean1 and mean2.
+% "Direct/Vars/Eps0.N/PDF2dStart-Stop_exp_n|d" containing the JPDFs
+
+ 
+% NOTE code prob should be modified so if only 1 Start and Stop is given,
+% it doesn't look at location
 %--------------------------------------------------------------------------------%
-    if nargin == 6
+    if nargin == 5
         eps = -Inf;
     end
 
-disp(['Finding 2D PDF for ' int2str(Start) '-' int2str(Stop)]);
-load([Direct 'ProcImgs/Proc' sprintf('%05d', Start(1))],'C1','C2')   %Proc Mean
-
-%How many Counts will PDF have? Note won't work for multiple starts/stops
-Ncounts=Box(1)*Box(2)*(Stop-Start+1);
-
-Box(2)=floor(Box(2)/2);
-Box(1)=floor(Box(1)/2);
+% Start Matlabpool
+%matlabpool open
 
 % Initilize Centers.  This also sets the length of the PDF
 Centers=0:.01:1;
     Cs(1)={Centers};
     Cs(2)={Centers};
 
+% Get size of the XYpts matrix    
+[Ys Xs]=size(JPDFs);    
+
 % Initilize N. first two dimentions are a PDF for a single x and Y point.
 % The second 2 dimentions will specify the X and Y point for that PDF.
-N=zeros(length(Centers), length(Centers), length(Xpts), length(Ypts));
 
+
+disp(['Finding 2D PDF for ' int2str(Start) '-' int2str(Stop)]);
+load([Direct 'ProcImgs/Proc' sprintf('%05d', Start(1))],'C1','C2')   %Proc Mean
+
+%% Start by running through each JPDF and initalizing it
+ind=1;
+while ind<=length(Start)
+    Str=Start(ind);Stp=Stop(ind);
+    %Load Means
+        load([Direct 'Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' sprintf('%05d', Start(ind)) '-' sprintf('%05d', Stop(ind))], 'mean1', 'mean2');   
+        Mean1=mean1; Mean2=mean2;
+    %Load RMS
+        load([Direct 'Vars/Eps' sprintf('%.3f', eps) '/RMSEe' sprintf('%05d', Start(ind)) '-' sprintf('%05d', Stop(ind))], 'RMSE1', 'RMSE2');   
+    %load Other Stats?
+        load([Direct 'Vars/Eps' sprintf('%.3f', eps) '/CovE' sprintf('%05d', Start(ind)) '-' sprintf('%05d', Stop(ind))], 'Cov', 'C1C2');   
+    for X=1:Xs
+        for Y=1:Ys
+            if(JPDFs(Y,X).Loc==ind) % check to make sure we're in the right image
+                % How many Counts will PDF have? 
+                JPDFs(Y,X).Ncounts=Box(1)*Box(2)*(Stp-Str+1);
+                JPDFs(Y,X).JPDF=zeros(length(Centers), length(Centers));
+                
+                %Define Box that JPDF is defined for
+                l=JPDFs(Y,X).Xpix-floor(Box(2)/2);
+                r=JPDFs(Y,X).Xpix+floor(Box(2)/2);
+                b=JPDFs(Y,X).Ypix-floor(Box(1)/2);
+                t=JPDFs(Y,X).Ypix+floor(Box(1)/2);
+                
+                % Add in the Stats for box
+                JPDFs(Y,X).Mean1=mean(mean( Mean1(b:t,l:r) ));
+                JPDFs(Y,X).Mean2=mean(mean( Mean2(b:t,l:r) ));
+                JPDFs(Y,X).RMSE1=mean(mean( RMSE1(b:t,l:r) ));
+                JPDFs(Y,X).RMSE2=mean(mean( RMSE2(b:t,l:r) ));
+                JPDFs(Y,X).Cov  =mean(mean(   Cov(b:t,l:r) )); %%?Is it RIGHT to average these over the box size?
+                JPDFs(Y,X).C1C2 =mean(mean(  C1C2(b:t,l:r) )); %%?Is it RIGHT to average these over the box size?
+            end
+        end
+    end
+    ind=ind+1;
+end
+
+%% Now Run through Each image, make approprate histograms, and add them to each JPDF
 ind=1;
 i=Start(ind);
 while ind<=length(Start)
-     load([Direct 'ProcImgs/Proc' sprintf('%05d', i)],'C1','C2')
-    % create histogram for each Box
-    for X=1:length(Xpts)
-        for Y=1:length(Ypts)
-            l=Xpts(X)-Box(2);
-            r=Xpts(X)+Box(2);
-            b=Ypts(Y)-Box(1);
-            t=Ypts(Y)+Box(1);
-            
-            C1s=C1(b:t,l:r);
-            C2s=C2(b:t,l:r);
-            Nt(:,:,X,Y)=hist3([C1s(:),C2s(:)],Cs); %will C always be the same? Only if i send it an an edges specifier..
+    for X=1:Xs
+        for Y=1:Ys
+            if(JPDFs(Y,X).Loc==ind) % check to make sure we're in the right image              
+                load([Direct 'ProcImgs/Proc' sprintf('%05d', i)],'C1','C2')
+
+                %Define Box that JPDF is defined for
+                l=JPDFs(Y,X).Xpix-floor(Box(2)/2);
+                r=JPDFs(Y,X).Xpix+floor(Box(2)/2);
+                b=JPDFs(Y,X).Ypix-floor(Box(1)/2);
+                t=JPDFs(Y,X).Ypix+floor(Box(1)/2);
+                
+                %Define Each Box
+                C1s=C1(b:t,l:r);C1s(C1s<eps)=0;
+                C2s=C2(b:t,l:r);C2s(C2s<eps)=0;
+
+                % create histogram for each Box and add it to the JPDF
+                Hist(:,:)=hist3([C1s(:),C2s(:)],Cs);
+                JPDFs(Y,X).JPDF=JPDFs(Y,X).JPDF+Hist;
+            end
         end
     end
-    % Add Nt (temp hist for each column of image) to N 
-    N=N+Nt;
     
     if i==Stop(ind)
         ind=ind+1;
@@ -77,8 +121,14 @@ while ind<=length(Start)
 end
 
 %Normalize by total counts to get a PDF
-N=N/Ncounts;
+for X=1:Xs
+	for Y=1:Ys
+        JPDFs(Y,X).JPDF=JPDFs(Y,X).JPDF./JPDFs(Y,X).Ncounts;
+    end
+end
 
-save([Direct 'Vars/Eps' sprintf('%.3f', eps) '/PDF2d' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'N','Cs');   %Proc Mean
+save([Direct 'Vars/Eps' sprintf('%.3f', eps) '/PDF2d' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'JPDFs');   %Proc Mean
 
+% stop matlabpool
+%matlabpool close
  

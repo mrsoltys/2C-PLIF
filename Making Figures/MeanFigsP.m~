@@ -82,7 +82,7 @@ subplot(2,2,3)
 load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' MeanName]);
     C1C2=fliplr(C1C2')/(A1*A2);
     Cov=fliplr(Cov')/(A1*A2);
-    imagesc(Xs,Ys,C1C2);caxis([0 .1])
+    imagesc(Xs,Ys,C1C2);caxis([0 1])
     colormap(flipud(gray));
     freezeColors;
     hold on;axis image;
@@ -107,7 +107,7 @@ subplot(2,2,4);
     B(1,:)= [0:1/31:1 ones(1,32)];
         B(2,:)= [0:1/31:1 1:-1/31:0];
         B(3,:)= [ones(1,32) 1:-1/31:0];
-        colormap(B');caxis([-1 1]);colorbar('location','EastOutside')
+        colormap(B');caxis([-.5 .5]);colorbar('location','EastOutside')
     hold on;axis image;
         plot(Xs(X1)+10.*mean(Rho(:,(X1-Sixth):(X1+Sixth) ),2),Ys,'k-.','LineWidth',1.5);
 

@@ -8,7 +8,7 @@ function ParTrans(Direct, Start, Stop, AddCrop)
 %       Start, Stop is the range of image numbers that are to process
 %
 %       AddCrop is a vector of cropping parameters.  If no cropping is
-%       desired, set to [0 0 0 0].
+%       desired, set to [0 0 0 0].  The cropping parameters are [? R ? ?]
 %   
 %   Additonal Reqiurments:
 %       The function will look for the following files in the

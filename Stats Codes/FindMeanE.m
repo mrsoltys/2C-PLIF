@@ -1,4 +1,4 @@
-function FindMeanE(Direct, Start, Stop,eps)
+function [mean1 mean2]=FindMeanE(Direct, Start, Stop,eps)
 %--------------------------------------------------------------------------------%
 % FindMeanE 
 % Finds the mean of a series of processed images, filtered with some threhold value
@@ -21,6 +21,8 @@ function FindMeanE(Direct, Start, Stop,eps)
 % the function will also output a file named
 % [Direct 'Vars/ProcMeansE' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))]
 % containing matricies for mean1 and mean2.
+%
+% Updated 12/7/12 to support parallel processing
 %--------------------------------------------------------------------------------%
     if nargin == 3
         eps = -Inf;
@@ -33,35 +35,28 @@ disp(['Finding mean for ' int2str(Start) '-' int2str(Stop)]);
 
 load([Direct 'ProcImgs/Proc' sprintf('%05d', Start(1))],'C1','C2')   %Proc Mean
                                                           
-mean1=zeros(size(C1));
-mean2=zeros(size(C2));
+Mean1=zeros(size(C1));
+Mean2=zeros(size(C2));
 
 ind=1;
-i=Start(ind);
 while ind<=length(Start)
-    load([Direct 'ProcImgs/Proc' sprintf('%05d', i)],'C1','C2')
-    C1(C1<=eps)=0;
-    C2(C2<=eps)=0;
-    mean1=mean1+C1;
-    mean2=mean2+C2;
+    parfor i=Start(ind):Stop(ind)
+        [C1 C2]=ParLoad([Direct 'ProcImgs/Proc' sprintf('%05d', i)], eps)
+        
+        Mean1=Mean1+C1;
+        Mean2=Mean2+C2;
+    end
     
     %Display Progress
 %    stopBar= progressbar((i-Start+1)/(Stop-Start),5);
 %       if (stopBar) break; end
     
-    if i==Stop(ind)
-        ind=ind+1;
-        if ind<=length(Start)
-            i=Start(ind);
-        end
-    else
-        i=i+1;
-    end
+    ind=ind+1;
 end
 
-mean1=mean1./(sum(Stop-Start)+length(Start));
-mean2=mean2./(sum(Stop-Start)+length(Start));
+mean1=Mean1./(sum(Stop-Start)+length(Start));
+mean2=Mean2./(sum(Stop-Start)+length(Start));
 
 save([Prefix '/ProcMeansE' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'mean1', 'mean2');   %Proc Mean
-FindRmsCovE(Direct, Start, Stop,eps)
+FindRmsCovE(Direct, Start, Stop,eps);
 end
