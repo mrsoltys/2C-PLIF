@@ -82,8 +82,14 @@ subplot(2,2,3)
 load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' MeanName]);
     C1C2=fliplr(C1C2')/(A1*A2);
     Cov=fliplr(Cov')/(A1*A2);
-    imagesc(Xs,Ys,C1C2);caxis([0 .1])
+    Cmax=10^(ceil( log10( max(C1C2(:)) )));
+    imagesc(Xs,Ys,C1C2);caxis([0 Cmax])
     colormap(flipud(gray));
+    cbfreeze(colorbar('location','EastOutside',...
+             'YTick',...
+             [0,Cmax/2,Cmax],...
+             'YTickLabel',...
+            {0,Cmax/2,Cmax }));
     freezeColors;
     hold on;axis image;
         plot(Xs(X1)+10.*mean(C1C2(:,(X1-Sixth):(X1+Sixth) ),2),Ys,'k-.','LineWidth',1.5);
@@ -92,9 +98,9 @@ load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' MeanName]);
 
         plot(Xs(X3)+10.*mean(C1C2(:,(X3-Sixth):(X3+Sixth) ),2),Ys,'k-.','LineWidth',1.5);
     hold off;
-    cbfreeze(colorbar('location','EastOutside'));
+    
     set(gca,'YDir', 'normal');axis([Xs(length(Xs)) Xs(1) -8 8]);
-    title('$\frac{\left< C_1 C_2 \right>}{\left< C_1 \right>_C\left< C_2 \right>_C}$','Interpreter','latex','FontSize',12)
+    title('$\left< C_1 C_2 \right>$','Interpreter','latex','FontSize',12)
     
     C1C2P=mean(C1C2,2);
     CovP=mean(Cov,2);

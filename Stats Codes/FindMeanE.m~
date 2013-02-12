@@ -65,26 +65,25 @@ mean2=EX2./(sum(Stop-Start)+length(Start));
 EXsq1=EXsq1./(sum(Stop-Start)+length(Start));
 EXsq2=EXsq2./(sum(Stop-Start)+length(Start));
 
-RMSE1=sqrt(EXsq1-EX1.^2);
-RMSE2=sqrt(EXsq2-EX2.^2);
+RMSE1=
 
-save([Prefix '/ProcMeansE' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'mean1', 'mean2', 'RMSE1', 'RMSE2');   %Proc Mean
+save([Prefix '/ProcMeansE' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'mean1', 'mean2');   %Proc Mean
 FindRmsCovE(Direct, Start, Stop,eps);
 end
 
-% Xsq=zeros(Size);
-% X  =zeros(Size);
-% 
-% %sigma=sqrt(E(X^2)-(E(X))^2)
-% for i=Start:Stop
-%     %Load Background
-%     B=double(imread(['RawImgs/' C1Dir(i).name]));
-%     % Add
-%     X=X+B;    
-%     Xsq=Xsq+B.^2;
-% end;
-% EXsq=Xsq/(Stop-Start+1);
-% EX=X/(Stop-Start+1);
-% 
-% Mean=EX;
-% StdDev=sqrt(EXsq-EX.^2);
+Xsq=zeros(Size);
+X  =zeros(Size);
+
+%sigma=sqrt(E(X^2)-(E(X))^2)
+for i=Start:Stop
+    %Load Background
+    B=double(imread(['RawImgs/' C1Dir(i).name]));
+    % Add
+    X=X+B;    
+    Xsq=Xsq+B.^2;
+end;
+EXsq=Xsq/(Stop-Start+1);
+EX=X/(Stop-Start+1);
+
+Mean=EX;
+StdDev=sqrt(EXsq-EX.^2);

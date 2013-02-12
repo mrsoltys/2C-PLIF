@@ -60,9 +60,8 @@ load(['Vars/PreRunVars'],'Scale');
             Symbol='s';
         elseif i==2
             Symbol='^';
-        elseif i==3
-            Symbol='o';
-        end
+        elseif i
+            Symbol='^';
         if i<=USptsL
             % Find the real pixel of the X point
             if USXData(2) > Xpts(i) % Need Check to see if the VO is on the screen.
@@ -76,8 +75,8 @@ load(['Vars/PreRunVars'],'Scale');
                 [mean1Bin BinYs]   = AverageBins( mean( USmean1(:,ceil(Col-BS/2):floor(Col+BS/2)) , 2 ) ,YDatUS,BS);
                 [mean2Bin BinYs]   = AverageBins( mean( USmean2(:,ceil(Col-BS/2):floor(Col+BS/2)) , 2 ) ,YDatUS,BS);
                 hold on;
-                    plot(mean1Bin,BinYs,['b' Symbol],'MarkerSize',4);
-                    plot(mean2Bin,BinYs,['r' Symbol],'MarkerSize',4);
+                    plot(mean1Bin,BinYs,['b' Symbol],'MarkerSize',2);
+                    plot(mean2Bin,BinYs,['r' Symbol],'MarkerSize',2);
                 hold off;
                 CSmean1(i,:)=mean1Bin;
                 CSmean2(i,:)=mean2Bin;
@@ -109,8 +108,8 @@ load(['Vars/PreRunVars'],'Scale');
                 [mean1Bin BinYs]   = AverageBins( mean( DSmean1(:,ceil(Col-BS/2):floor(Col+BS/2)) , 2 ) ,YDatDS,BS);
                 [mean2Bin BinYs]   = AverageBins( mean( DSmean2(:,ceil(Col-BS/2):floor(Col+BS/2)) , 2 ) ,YDatDS,BS);
                 hold on;
-                plot(mean1Bin,BinYs,['b' Symbol],'MarkerSize',4);
-                plot(mean2Bin,BinYs,['r' Symbol],'MarkerSize',4);
+                plot(mean1Bin,BinYs,['b' Symbol],'MarkerSize',2);
+                plot(mean2Bin,BinYs,['r' Symbol],'MarkerSize',2);
                 hold off;
                 CSmean1(i,:)=mean1Bin;
                 CSmean2(i,:)=mean2Bin;

@@ -38,6 +38,18 @@ DFBind=[0 0 0];
 disp('Getting Directory Info');
     Dir=dir([Direct 'RawImgs/*.tif']);
     %C2Dir=dir([Direct 'RawImgs/*2_*.tif']);    
+    
+reply = input('Was this taken with the old Dalstar cameras? Y/N [N]: ', 's');
+if isempty(reply)
+    reply = 'N';
+end
+if reply=='Y'
+    OldCams=true;
+elseif reply=='y'
+    OldCams=true;
+else
+    OldCams=false;
+end
 
 %% Step2, Load Image Numbers, Series Name, etc from StreamStor Title!
 disp('Getting Series Info');
@@ -58,19 +70,27 @@ ind2=1;
                 j=j+1;
             end
         end
-        
-        Dir(i).SerName=Name(1:(j-1));
-        Dir(i).CamNo  =str2num(Name(j+1));
+        if OldCams==0
+            Dir(i).SerName=Name(1:(j-1));
+            Dir(i).CamNo  =str2num(Name(j+1));
+        else 
+            Dir(i).SerName=[Name(1:(j-2)) Name((j+1):(j+4))];
+            Dir(i).CamNo  =str2num(Name(j-1));
+        end
         k=j+4; 
         while k<=length(Name) && Name(k)~='_'
             k=k+1;
         end
-        if Name(j+5)=='-' %%If you use the export function in quazar, the series number gets screwed
-            Dir(i).SeriesNo=str2num(Name(j+4));
-        elseif Name(j+6)=='-'
-            Dir(i).SeriesNo=str2num(Name((j+4):(j+5)));
+        if OldCams==0
+            if Name(j+5)=='-' %%If you use the export function in quazar, the series number gets screwed
+                Dir(i).SeriesNo=str2num(Name(j+4));
+            elseif Name(j+6)=='-'
+                Dir(i).SeriesNo=str2num(Name((j+4):(j+5)));
+            else
+                Dir(i).SeriesNo = str2num(Name((j+4):(k-1))); 
+            end
         else
-            Dir(i).SeriesNo = str2num(Name((j+4):(k-1))); 
+            Dir(i).SeriesNo = str2num(Name((j+1):(k-1))); 
         end
         
         Dir(i).ImgNo    = str2num(Name((k+1):(length(Name)-4)));

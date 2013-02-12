@@ -1,5 +1,5 @@
 function [VO CLxdat CLmean1 CLmean2 CLrms1 CLrms2 CLc1c2 CLcov CLs CLrho ] = CLfigs(USstart, USstop, DSstart, DSstop, eps, Xshift,Expon, NAME)
-BS=20
+BS=30;
 load(['Vars/Eps' sprintf('%.3f', eps) '/VOetc' NAME],'VO','S','USycent','DSycent','Yshift','USXData','USYData','DSXData','DSYData','Ang1','Ang2');
     % Load US stuff
         mean2=[];
