@@ -65,8 +65,8 @@ mean2=EX2./(sum(Stop-Start)+length(Start));
 EXsq1=EXsq1./(sum(Stop-Start)+length(Start));
 EXsq2=EXsq2./(sum(Stop-Start)+length(Start));
 
-RMSE1=sqrt(EXsq1-EX1.^2);
-RMSE2=sqrt(EXsq2-EX2.^2);
+RMSE1=sqrt(EXsq1-mean1.^2);
+RMSE2=sqrt(EXsq2-mean2.^2);
 
 save([Prefix '/ProcMeansE' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'mean1', 'mean2', 'RMSE1', 'RMSE2');   %Proc Mean
 FindRmsCovE(Direct, Start, Stop,eps);

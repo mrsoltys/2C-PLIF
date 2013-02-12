@@ -11,21 +11,23 @@ function JetVORescale(USstart, USstop, DSstart, DSstop, eps, Xshift,Expon, NAME)
         USMeanName=[ sprintf('%05d', USstart) '-'  sprintf('%05d', USstop)];
             load(['Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' USMeanName]);
                 USmean1=mean1;USmean2=mean2;
+                USRMSE1=RMSE1;USRMSE2=RMSE2;
                 [USr USc]=size(mean1);
             load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' USMeanName]);
                 USC1C2=C1C2;USCov=Cov;
-            load(['Vars/Eps' sprintf('%.3f', eps) '/RMSEe' USMeanName]);
-                USRMSE1=RMSE1;USRMSE2=RMSE2;
+            %load(['Vars/Eps' sprintf('%.3f', eps) '/RMSEe' USMeanName]);
+                
 
     % Load DS stats;
         DSMeanName=[ sprintf('%05d', DSstart) '-'  sprintf('%05d', DSstop)];
             load(['Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' DSMeanName]);
                 DSmean1=mean1;DSmean2=mean2;
+                DSRMSE1=RMSE1;DSRMSE2=RMSE2;
                 [DSr DSc]=size(mean1);
             load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' DSMeanName]);
                 DSC1C2=C1C2;DSCov=Cov;
-            load(['Vars/Eps' sprintf('%.3f', eps) '/RMSEe' DSMeanName]);
-                DSRMSE1=RMSE1;DSRMSE2=RMSE2;
+          %  load(['Vars/Eps' sprintf('%.3f', eps) '/RMSEe' DSMeanName]);
+               
                 
     % Run through Means, Fit Gaussians.
         for i=1:USc

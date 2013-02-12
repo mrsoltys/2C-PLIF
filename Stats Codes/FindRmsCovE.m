@@ -51,8 +51,8 @@ while ind<=length(Start)
     parfor i=Start(ind):Stop(ind)
         [C1 C2]=ParLoad([Direct 'ProcImgs/Proc' sprintf('%05d', i)], eps)
         
-        RMSE1=RMSE1+(C1-mean1).^2;
-        RMSE2=RMSE2+(C2-mean2).^2;
+      %  RMSE1=RMSE1+(C1-mean1).^2;
+      %  RMSE2=RMSE2+(C2-mean2).^2;
         C1C2=C1C2+C1.*C2;
         Cov=Cov+(C1-mean1).*(C2-mean2);
     end
@@ -63,9 +63,9 @@ end
 
 C1C2=C1C2./(sum(Stop-Start)+length(Start));
 Cov=Cov./(sum(Stop-Start)+length(Start));
-RMSE1=sqrt(RMSE1./(sum(Stop-Start)+length(Start)));
-RMSE2=sqrt(RMSE2./(sum(Stop-Start)+length(Start)));
+%RMSE1=sqrt(RMSE1./(sum(Stop-Start)+length(Start)));
+%RMSE2=sqrt(RMSE2./(sum(Stop-Start)+length(Start)));
 
 save([Prefix '/CovE'  sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'Cov', 'C1C2');
-save([Prefix '/RMSEe' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'RMSE1', 'RMSE2');
+%save([Prefix '/RMSEe' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'RMSE1', 'RMSE2');
 end
