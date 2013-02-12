@@ -39,6 +39,7 @@ EX1=zeros(size(C1));
 EX2=zeros(size(C2));
 EXsq1=EX1;
 EXsq2=EX2;
+C1C2=zeros(size(C1));
 
 ind=1;
 while ind<=length(Start)
@@ -50,6 +51,8 @@ while ind<=length(Start)
         
         EXsq1=EXsq1+C1.^2;
         EXsq2=EXsq2+C2.^2;
+        
+        C1C2=C1C2+C1.*C2;
     end
     
     %Display Progress
@@ -59,17 +62,20 @@ while ind<=length(Start)
     ind=ind+1;
 end
 
-mean1=EX1./(sum(Stop-Start)+length(Start));
-mean2=EX2./(sum(Stop-Start)+length(Start));
-
 EXsq1=EXsq1./(sum(Stop-Start)+length(Start));
 EXsq2=EXsq2./(sum(Stop-Start)+length(Start));
+
+mean1=EX1./(sum(Stop-Start)+length(Start));
+mean2=EX2./(sum(Stop-Start)+length(Start));
 
 RMSE1=sqrt(EXsq1-mean1.^2);
 RMSE2=sqrt(EXsq2-mean2.^2);
 
-save([Prefix '/ProcMeansE' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'mean1', 'mean2', 'RMSE1', 'RMSE2');   %Proc Mean
-FindRmsCovE(Direct, Start, Stop,eps);
+C1C2=C1C2./(sum(Stop-Start)+length(Start));
+Cov=C1C2-mean1.*mean2;
+
+save([Prefix '/ProcMeansE' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'mean1', 'mean2', 'RMSE1', 'RMSE2', 'C1C2', 'Cov');   %Proc Mean
+%FindRmsCovE(Direct, Start, Stop,eps);
 end
 
 % Xsq=zeros(Size);

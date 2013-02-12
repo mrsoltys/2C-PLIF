@@ -13,7 +13,7 @@ function JetVORescale(USstart, USstop, DSstart, DSstop, eps, Xshift,Expon, NAME)
                 USmean1=mean1;USmean2=mean2;
                 USRMSE1=RMSE1;USRMSE2=RMSE2;
                 [USr USc]=size(mean1);
-            load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' USMeanName]);
+            %load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' USMeanName]);
                 USC1C2=C1C2;USCov=Cov;
             %load(['Vars/Eps' sprintf('%.3f', eps) '/RMSEe' USMeanName]);
                 
@@ -24,7 +24,7 @@ function JetVORescale(USstart, USstop, DSstart, DSstop, eps, Xshift,Expon, NAME)
                 DSmean1=mean1;DSmean2=mean2;
                 DSRMSE1=RMSE1;DSRMSE2=RMSE2;
                 [DSr DSc]=size(mean1);
-            load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' DSMeanName]);
+           %load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' DSMeanName]);
                 DSC1C2=C1C2;DSCov=Cov;
           %  load(['Vars/Eps' sprintf('%.3f', eps) '/RMSEe' DSMeanName]);
                
