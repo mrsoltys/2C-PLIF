@@ -11,23 +11,23 @@ function JetVORescale(USstart, USstop, DSstart, DSstop, eps, Xshift,Expon, NAME)
         USMeanName=[ sprintf('%05d', USstart) '-'  sprintf('%05d', USstop)];
             load(['Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' USMeanName]);
                 USmean1=mean1;USmean2=mean2;
-                USRMSE1=RMSE1;USRMSE2=RMSE2;
+                
                 [USr USc]=size(mean1);
-            %load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' USMeanName]);
+           % load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' USMeanName]);
                 USC1C2=C1C2;USCov=Cov;
             %load(['Vars/Eps' sprintf('%.3f', eps) '/RMSEe' USMeanName]);
-                
+                USRMSE1=RMSE1;USRMSE2=RMSE2;
 
     % Load DS stats;
         DSMeanName=[ sprintf('%05d', DSstart) '-'  sprintf('%05d', DSstop)];
             load(['Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' DSMeanName]);
                 DSmean1=mean1;DSmean2=mean2;
-                DSRMSE1=RMSE1;DSRMSE2=RMSE2;
+                
                 [DSr DSc]=size(mean1);
            %load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' DSMeanName]);
                 DSC1C2=C1C2;DSCov=Cov;
-          %  load(['Vars/Eps' sprintf('%.3f', eps) '/RMSEe' DSMeanName]);
-               
+           % load(['Vars/Eps' sprintf('%.3f', eps) '/RMSEe' DSMeanName]);
+               DSRMSE1=RMSE1;DSRMSE2=RMSE2;
                 
     % Run through Means, Fit Gaussians.
         for i=1:USc
@@ -145,10 +145,12 @@ L=length(RegStuff);
            
         VO=NewVO
         
+%Need to measure S (Distance between centers) at VO (+/-15 around VO?)
+%load(['Vars/Eps' sprintf('%.3f', eps) '/VOetc' NAME],'S');
+        S=mean(abs(RegStuff(4,round(VO-15):round(VO+15))-RegStuff(5,round(VO-15):round(VO+15))));
 %Rescale Files, find means
 %% NOT DONE
-% Need To Rescale X data (Note, for now not changing S or Y data
-load(['Vars/Eps' sprintf('%.3f', eps) '/VOetc' NAME],'S');
+% Need To Rescale X data
 USXData=([USc 1]-VO)/S;
 USYData=(UScent-[1 USr])/S;
 DSXData=([USc-Xshift+DSc USc-Xshift]-VO)/S;
@@ -162,4 +164,4 @@ FindMeanE('',USstart, USstop,eps);
 RescaleProcessedImgs(DSstart, DSstop, Scale1, Scale2)
 FindMeanE('',DSstart, DSstop,eps);
 
-save(['Vars/Eps' sprintf('%.3f', eps) '/VOetc' NAME],'VO', 'USXData','DSXData','USYData','DSYData','-append');
+save(['Vars/Eps' sprintf('%.3f', eps) '/VOetc' NAME],'VO', 'S', 'USXData','DSXData','USYData','DSYData','-append');

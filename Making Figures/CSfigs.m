@@ -11,9 +11,9 @@ load(['Vars/PreRunVars'],'Scale');
             load(['Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' USMeanName]);
                 USmean1=imrotate(mean1,Ang1,'crop');USmean2=imrotate(mean2,Ang1,'crop');
                 [USr USc]=size(mean1);
-            load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' USMeanName]);
+            %load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' USMeanName]);
                 USC1C2=imrotate(C1C2,Ang1,'crop');USCov=imrotate(Cov,Ang1,'crop');
-            load(['Vars/Eps' sprintf('%.3f', eps) '/RMSEe' USMeanName]);
+            %load(['Vars/Eps' sprintf('%.3f', eps) '/RMSEe' USMeanName]);
                 USRMSE1=imrotate(RMSE1,Ang1,'crop');USRMSE2=imrotate(RMSE2,Ang1,'crop');
         
     % Load DS stats;
@@ -21,9 +21,9 @@ load(['Vars/PreRunVars'],'Scale');
             load(['Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' DSMeanName]);
                 DSmean1=imrotate(mean1,Ang2,'crop');DSmean2=imrotate(mean2,Ang2,'crop');
                 [DSr DSc]=size(mean1);
-            load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' DSMeanName]);
+            %load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' DSMeanName]);
                 DSC1C2=imrotate(C1C2,Ang2,'crop');DSCov=imrotate(Cov,Ang2,'crop');
-            load(['Vars/Eps' sprintf('%.3f', eps) '/RMSEe' DSMeanName]);
+            %load(['Vars/Eps' sprintf('%.3f', eps) '/RMSEe' DSMeanName]);
                 DSRMSE1=imrotate(RMSE1,Ang2,'crop');DSRMSE2=imrotate(RMSE2,Ang2,'crop');
 
         UScl=USycent
