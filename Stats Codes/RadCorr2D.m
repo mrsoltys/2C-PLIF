@@ -1,4 +1,4 @@
- function RadCorr = RadCorr2D(Img1,Img2)
+ function RadCorr = RadCorr2D(Img1,Img2,Scale)
 
 %function RadCorr2D(Img1,Img2)
     Xcorr=xcorr2(Img1,Img2);
@@ -43,8 +43,15 @@
         end
     end
     
+    [Corrs Xs]   = AverageBins( RadCorr(2,:),RadCorr(1,:),20);
+    
     %% Plot?
-    plot(RadCorr(1,:),RadCorr(2,:),'.')
+    Size=size(Img1);
+    subplot(1,2,1);imshow(ColorChangeWhite(Img2,Img1),'YData',(1:Size(1))/Scale,'XData',(1:Size(2))/Scale)
+    xlabel('x [cm]');ylabel('z [cm]');
+    subplot(1,2,2);
+    plot(Xs/Scale,Corrs,'-')
+    xlabel('r [cm]');
     
     
     

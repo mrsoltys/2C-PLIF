@@ -44,6 +44,7 @@ C1C2=zeros(size(C1));
 ind=1;
 while ind<=length(Start)
     parfor i=Start(ind):Stop(ind)
+        iStart=tic;
         [C1 C2]=ParLoad([Direct 'ProcImgs/Proc' sprintf('%05d', i)], eps)
         
         EX1=EX1+C1;
@@ -53,14 +54,12 @@ while ind<=length(Start)
         EXsq2=EXsq2+C2.^2;
         
         C1C2=C1C2+C1.*C2;
+        
     end
-    
-    %Display Progress
-%    stopBar= progressbar((i-Start+1)/(Stop-Start),5);
-%       if (stopBar) break; end
     
     ind=ind+1;
 end
+
 
 EXsq1=EXsq1./(sum(Stop-Start)+length(Start));
 EXsq2=EXsq2./(sum(Stop-Start)+length(Start));
@@ -77,6 +76,8 @@ Cov=C1C2-mean1.*mean2;
 save([Prefix '/ProcMeansE' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'mean1', 'mean2', 'RMSE1', 'RMSE2', 'C1C2', 'Cov');   %Proc Mean
 %FindRmsCovE(Direct, Start, Stop,eps);
 end
+
+
 
 % Xsq=zeros(Size);
 % X  =zeros(Size);

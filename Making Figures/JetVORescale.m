@@ -79,13 +79,13 @@ function JetVORescale(USstart, USstop, DSstart, DSstop, eps, Xshift,Expon, NAME)
 L=length(RegStuff);
 
 % (2) Match the 1/C profiles between scalars so there is symmetry DS
-    midReg=(1./RegStuff(6,:)+1./RegStuff(7,:))/2;
-    NewScale1=mean((1./RegStuff(6,i:L))./midReg(i:L));
-    NewScale2=mean((1./RegStuff(7,i:L))./midReg(i:L));
+    midReg=(1./(RegStuff(6,:))+1./(RegStuff(7,:)))/2;
+    %NewScale1=mean((1./RegStuff(6,i:L))./midReg(i:L));
+    %NewScale2=mean((1./RegStuff(7,i:L))./midReg(i:L));
 
-    CLmax1=RegStuff(6,:)*NewScale1;
-    CLmax2=RegStuff(7,:)*NewScale2;
-    midReg=(1./CLmax1(:)+1./CLmax2(:))/2;
+    %CLmax1=RegStuff(6,:)*NewScale1;
+    %CLmax2=RegStuff(7,:)*NewScale2;
+    %midReg=(1./CLmax1(:)+1./CLmax2(:))/2;
 
 % (1) Find VO using 1/C
    % Plot Jet Spreading (Sigma) vs x values.    
@@ -105,49 +105,57 @@ L=length(RegStuff);
 	% Loop through regression process.  Trim Data and refit untill VO isn't
 	% changing much between loops. Note: This is a bit "handwavy" would be
 	% better to go untill some definition of the linear region is met.
-        error=1
+        error=1;
         
            while error>.01 
                 % Find where line devates from linear regression.
                 % Currently this is done by finding the point where the
                 % line first intersects the average of the two widths
-
-                i=1;
-                while i<=L && (abs( midReg(i) - FitYs(i) )./midReg(i) > .5)      
-                    i=i+1;
-                end
-                i ;   
-
-                %Rescale (3) I'd like the Concentration @ the VO ~=1 for both scalars
-                if OldVO>=6
-                    NewScale=mean(midReg( round(OldVO-5):round(OldVO+5)))
+                if OldVO>1
+                    i=OldVO;
                 else
-                    NewScale=mean(midReg( 1:6))
+                    i=1;
+                    while i<=L && (abs( midReg(i) - FitYs(i) )./midReg(i) > .5)      
+                        i=i+1;
+                    end
+                    i ;   
                 end
-                CLmax1(:)=CLmax1(:)*NewScale;
-                CLmax2(:)=CLmax2(:)*NewScale;
-                midReg=(1./CLmax1(:)+1./CLmax2(:))/2;
+
+%                This is WRONG
+%                %Rescale (3) I'd like the Concentration @ the VO ~=1 for both scalars
+%                if OldVO>=6
+%                    NewScale=mean(midReg( round(OldVO-5):round(OldVO+5)));
+%                else
+%                    NewScale=mean(midReg( 1:6));
+%                end
+%                midReg=midReg/NewScale;
                 
                 %refit
-                    [p1,S1] = polyfit(RegStuff(1,i:L),1./CLmax1(i:L),1);
-                    [p2,S2] = polyfit(RegStuff(1,i:L),1./CLmax2(i:L),1);
-                        po=(p1+p2)./2;
+                    [po,So] = polyfit(RegStuff(1,i:L),midReg(i:L)',1);
                     FitYs=po(1).*RegStuff(1,:)+po(2);
-                    NewVO=-po(2)/po(1)
+                    NewVO=-po(2)/po(1);
+                    
                 
                 error=abs(NewVO-OldVO);
                 OldVO=NewVO;
 
-                %plot(RegStuff(1,:),FitYs,'k');
-                
-
+                plot(RegStuff(1,:),FitYs,'k');hold on;
+                plot(RegStuff(1,:),midReg,'g');hold off;
            end
            
         VO=NewVO
         
 %Need to measure S (Distance between centers) at VO (+/-15 around VO?)
 %load(['Vars/Eps' sprintf('%.3f', eps) '/VOetc' NAME],'S');
-        S=mean(abs(RegStuff(4,round(VO-15):round(VO+15))-RegStuff(5,round(VO-15):round(VO+15))));
+        %S=mean(abs(RegStuff(4,round(VO-15):round(VO+15))-RegStuff(5,round(VO-15):round(VO+15))));
+        S=trimmean(abs(RegStuff(4,1:round(VO))-RegStuff(5,1:round(VO))),20)
+%Need to set S to 1 of 2 values.
+load(['Vars/PreRunVars'],'Scale');
+if S/Scale<2
+    S=1.4*Scale;
+else
+    S=2.5*Scale;
+end
 %Rescale Files, find means
 %% NOT DONE
 % Need To Rescale X data
@@ -157,11 +165,27 @@ DSXData=([USc-Xshift+DSc USc-Xshift]-VO)/S;
 DSYData=(DScent-[1 USr])/S;
     
 % Rescale US images based on A1, A2
-Scale1=mean(CLmax1./RegStuff(6,:));
-Scale2=mean(CLmax2./RegStuff(7,:));
-RescaleProcessedImgs(USstart, USstop, Scale1, Scale2)
-FindMeanE('',USstart, USstop,eps);
-RescaleProcessedImgs(DSstart, DSstop, Scale1, Scale2)
-FindMeanE('',DSstart, DSstop,eps);
+% Note: This is WRONG becasue VO is downstream of maximum, and this bases 
+% the scale of the mean, but fluctuaions above the mean may occur here.
+% This scales things too large so concentrations are likely to occur
+% greater than 1.
+%Scale1=trimmean((1./midReg')./RegStuff(6,:),10)
+%Scale2=trimmean((1./midReg')./RegStuff(7,:),10)
+   %SortReg6=sort(RegStuff(6,:),'descend');
+   %Scale1=trimmean(1./SortReg6(1:round(L*.02)),10)
+   %SortReg7=sort(RegStuff(7,:),'descend');
+   %Scale2=trimmean(1./SortReg7(1:round(L*.02)),10)
+   %plot(RegStuff(6,:).*Scale1);hold on;
+   %plot(RegStuff(7,:).*NewScale2,'r');  
+
+%RescaleProcessedImgs(USstart, USstop, Scale1, Scale2)
+%FindMeanE('',USstart, USstop,eps);
+%RescaleProcessedImgs(DSstart, DSstop, Scale1, Scale2)
+%FindMeanE('',DSstart, DSstop,eps);
 
 save(['Vars/Eps' sprintf('%.3f', eps) '/VOetc' NAME],'VO', 'S', 'USXData','DSXData','USYData','DSYData','-append');
+
+%FlipMean1=fliplr(USmean1);
+%for i=2:1*VO
+%    MidVec1(i)=mean(FlipMean1(round(RegStuff(4,i)-5):round(RegStuff(4,i)+5),i))
+%end

@@ -385,8 +385,8 @@ load('Vars/PreRunVars','Scale');
     %print('-dpdf','-r500',['Vars/Eps' sprintf('%.3f', eps) '/' TitleTxt '_Locator_' num2str(n) '|' num2str(d) '.pdf'])
 %% Now we need to find the actual PDFs  Need to format PDF2d to accomindate a matrix of X, Y pts (Should i consider 
 
-  % [JPDFs]=PDF2d('',[USstart DSstart],[USstop DSstop],PDFs,Box,eps);
-  load(['Vars/Eps' sprintf('%.3f', eps) '/PDF2d' sprintf('%05d', USstart) '-' sprintf('%05d', DSstop)], 'JPDFs');   %Proc Mean
+   [JPDFs]=PDF2d('',[USstart DSstart],[USstop DSstop],PDFs,Box,eps);
+  %load(['Vars/Eps' sprintf('%.3f', eps) '/PDF2d' sprintf('%05d', USstart) '-' sprintf('%05d', DSstop)], 'JPDFs');   %Proc Mean
   
 %% STEP 3: Plot that shoot.
 PDFsize=length(JPDFs(1).JPDF);
@@ -411,11 +411,7 @@ set(Figure2,'defaulttextinterpreter','latex')
 
 [Ys Xs]=size(JPDFs);  
 
-Contours=[.001 .002 .005 .01 .02]; 
-for P=1:length(Contours)
-    ContLabel{P}=num2str(Contours(P),'%.4f');
-end
-
+Contours=[.0001 .0003 .001 .003 .01 .03]; 
 %cbot=3*log(Contours(1))/2-log(Contours(2))/2;
 %        ctop=log(Contours(length(Contours)));
         

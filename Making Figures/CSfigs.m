@@ -44,7 +44,11 @@ load(['Vars/PreRunVars'],'Scale');
     YDatUS=linspace(USYData(1), USYData(2), USr); 
     YDatDS=linspace(DSYData(1), DSYData(2), DSr);
         
-  Xpts=[7.5 15 22.5]
+  if S/Scale<2
+      Xpts=[5 10 15 20]
+  else
+      Xpts=[2.5 5 7.5 10]
+  end
         USptsL=find(Xpts>((XDatUS(1)+XDatDS(DSc))/2),1,'first')-1;
         DSptsL=find(Xpts>XDatDS(1),1,'first')-1;
         if(isempty(USptsL));
@@ -56,12 +60,26 @@ load(['Vars/PreRunVars'],'Scale');
         Xpts=Xpts(1:DSptsL);
 
     for i=1:length(Xpts)
-        if i==1
-            Symbol='s';
-        elseif i==2
-            Symbol='^';
-        elseif i==3
-            Symbol='o';
+        if S/Scale<2
+            if i==1
+                Symbol='s--';
+            elseif i==2
+                Symbol='o-';
+            elseif i==3
+                Symbol='+';
+            elseif i==4
+                Symbol='^';
+            end
+        else
+            if i==1
+                Symbol='p:';
+            elseif i==2
+                Symbol='s--';
+            elseif i==3
+                Symbol='v-.';
+            elseif i==4
+                Symbol='o-';
+            end
         end
         if i<=USptsL
             % Find the real pixel of the X point

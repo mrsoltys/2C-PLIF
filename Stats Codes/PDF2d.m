@@ -33,7 +33,7 @@ function [JPDFs]=PDF2d(Direct, Start, Stop, JPDFs, Box, eps)
 %matlabpool open
 
 % Initilize Centers.  This also sets the length of the PDF
-Centers=0:.01:1;
+Centers=0:.02:1;
     Cs(1)={Centers};
     Cs(2)={Centers};
 
@@ -47,17 +47,18 @@ Centers=0:.01:1;
 disp(['Finding 2D PDF for ' int2str(Start) '-' int2str(Stop)]);
 load([Direct 'ProcImgs/Proc' sprintf('%05d', Start(1))],'C1','C2')   %Proc Mean
 
+
 %% Start by running through each JPDF and initalizing it
 ind=1;
 while ind<=length(Start)
     Str=Start(ind);Stp=Stop(ind);
     %Load Means
-        load([Direct 'Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' sprintf('%05d', Start(ind)) '-' sprintf('%05d', Stop(ind))], 'mean1', 'mean2');   
+        load([Direct 'Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' sprintf('%05d', Start(ind)) '-' sprintf('%05d', Stop(ind))], 'mean1', 'mean2', 'RMSE1', 'RMSE2', 'Cov', 'C1C2');   
         Mean1=mean1; Mean2=mean2;
     %Load RMS
-        load([Direct 'Vars/Eps' sprintf('%.3f', eps) '/RMSEe' sprintf('%05d', Start(ind)) '-' sprintf('%05d', Stop(ind))], 'RMSE1', 'RMSE2');   
+    %    load([Direct 'Vars/Eps' sprintf('%.3f', eps) '/RMSEe' sprintf('%05d', Start(ind)) '-' sprintf('%05d', Stop(ind))], );   
     %load Other Stats?
-        load([Direct 'Vars/Eps' sprintf('%.3f', eps) '/CovE' sprintf('%05d', Start(ind)) '-' sprintf('%05d', Stop(ind))], 'Cov', 'C1C2');   
+    %    load([Direct 'Vars/Eps' sprintf('%.3f', eps) '/CovE' sprintf('%05d', Start(ind)) '-' sprintf('%05d', Stop(ind))], );   
     for X=1:Xs
         for Y=1:Ys
             if(JPDFs(Y,X).Loc==ind) % check to make sure we're in the right image
@@ -83,6 +84,13 @@ while ind<=length(Start)
     end
     ind=ind+1;
 end
+
+
+%% For Progress Bar
+Length=sum(Stop-Start)+length(Start)-1;
+Count=0;
+WaitBar = waitbar(0,'Initializing waitbar...');
+tic;
 
 %% Now Run through Each image, make approprate histograms, and add them to each JPDF
 ind=1;
@@ -110,6 +118,9 @@ while ind<=length(Start)
         end
     end
     
+    Count=Count+1;
+    MikesPogressBar(Count,Length,WaitBar)
+    
     if i==Stop(ind)
         ind=ind+1;
         if ind<=length(Start)
@@ -119,6 +130,8 @@ while ind<=length(Start)
         i=i+1;
     end
 end
+
+close(WaitBar);
 
 %Normalize by total counts to get a PDF
 for X=1:Xs
