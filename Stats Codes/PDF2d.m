@@ -33,7 +33,8 @@ function [JPDFs]=PDF2d(Direct, Start, Stop, JPDFs, Box, eps)
 %matlabpool open
 
 % Initilize Centers.  This also sets the length of the PDF
-Centers=0:.02:1;
+Centers=linspace(0,1,120);
+%Centers=0:.01:1;
     Cs(1)={Centers};
     Cs(2)={Centers};
 

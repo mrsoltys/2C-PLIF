@@ -20,6 +20,8 @@ function [ A1, A2, Xs, Ys ] = DiagnosticFigs( MeanName , Shift, TitleText,angle,
     load(['Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' MeanName]);
         mean1=imrotate(mean1,angle);
         mean2=imrotate(mean2,angle);
+        C1C2=imrotate(C1C2,angle);
+        Cov=imrotate(Cov,angle);
     
 %Figure out Dimentional Xs and Ys    
     [y x]=size(mean1);
@@ -39,8 +41,8 @@ for i=1:x
 end
 
 
-    RescaleProcessedImgs(USstart, USstop, 1/USscale1, 1/USscale2)
-    FindMeanE('',USstart, USstop,eps);
+    %RescaleProcessedImgs(USstart, USstop, 1/USscale1, 1/USscale2)
+    %FindMeanE('',USstart, USstop,eps);
    
     %Fit gaussians to mean, use these to find centerpoint and spacing    
     [sigma1,mu1,A1]=mygaussfit(Ys,mean(mean1,2));
@@ -72,9 +74,8 @@ end
     title('$\left< C_1 \right>$ and $\left< C_2 \right>$','Interpreter','latex','FontSize',12)
 
 subaxis(2,2,3,'Spacing', 0.05, 'Padding', 0.05, 'Margin', .03);
-load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' MeanName]);
-C1C2=imrotate(C1C2,angle);
-Cov=imrotate(Cov,angle);
+%load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' MeanName]);
+
     Mix=Cov./C1C2;
     imagesc(Xs,Ys,Mix);axis image;caxis([-1 1]);
     B(1,:)= [0:1/31:1 ones(1,32)]; B(2,:)= [0:1/31:1 1:-1/31:0]; B(3,:)= [ones(1,32) 1:-1/31:0];

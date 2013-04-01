@@ -273,25 +273,25 @@ load('Vars/PreRunVars','Scale');
     YDatDS=linspace(DSYData(1), DSYData(2), DSr);
 
     %Note, Y points will fall at -sigma, -.5, 0, .5, simga
-        UShgh=find(YDatUS < 1.5,1,'first');
+        UShgh=find(YDatUS < 1.0,1,'first');
         UStop=find(YDatUS < 0.5,1,'first');
         USmid=find(YDatUS < 0.0,1,'first');
         USbot=find(YDatUS <-0.5,1,'first');
-        USlow=find(YDatUS <-1.5,1,'first');
+        USlow=find(YDatUS <-1.0,1,'first');
     
-        DShgh=find(YDatDS < 1.5,1,'first');
+        DShgh=find(YDatDS < 1.0,1,'first');
         DStop=find(YDatDS < 0.5,1,'first');
         DSmid=find(YDatDS < 0.0,1,'first');
         DSbot=find(YDatDS <-0.5,1,'first');
-        DSlow=find(YDatDS <-1.5,1,'first');
+        DSlow=find(YDatDS <-1.0,1,'first');
     
   
     %X pts, for new coordnate system in plots, will have to convert for DS image   
    % Xpts=[4 12 20 28]*Scale/S
    if S/Scale<2
-       Xpts=[5 10 15 20];
+       Xpts=[5 10 20];
    else
-       Xpts=[2.5 5 7.5 10];
+       Xpts=[2.5 5 10];
    end
    % Xpts=0:3:60 % Note: The index of XData closest to the points is the easiest conversion, Need some way oto distinguish between upstream and downstreamfo
   % Initialize PDF point matricies
@@ -386,17 +386,17 @@ load('Vars/PreRunVars','Scale');
 %% Now we need to find the actual PDFs  Need to format PDF2d to accomindate a matrix of X, Y pts (Should i consider 
 
   % [JPDFs]=PDF2d('',[USstart DSstart],[USstop DSstop],PDFs,Box,eps);
-  load(['Vars/Eps' sprintf('%.3f', eps) '/PDF2d' sprintf('%05d', USstart) '-' sprintf('%05d', DSstop)], 'JPDFs');   %Proc Mean
+   load(['Vars/Eps' sprintf('%.3f', eps) '/PDF2d' sprintf('%05d', USstart) '-' sprintf('%05d', DSstop)], 'JPDFs');   %Proc Mean
   
 %% STEP 3: Plot that shoot.
 PDFsize=length(JPDFs(1).JPDF);
 Figure2=figure(2);
-clf;colormap(flipud(gray.^.5));%colormap(flipud(gray.^.75));
+clf;colormap(flipud(hot));%colormap(flipud(gray.^.75));
 [Ys Xs]=size(JPDFs); 
-MG=.017
+MG=.015
 Height=8.5;
 GraphSize=(Height-(3+3)*MG*Height)/3;
-Width=(Xs*GraphSize)/(1-(5+Xs)*MG);
+Width=(Xs*GraphSize)/(1-(2+Xs)*MG);
 set(Figure2,'defaulttextinterpreter','latex')
     set(Figure2,'PaperUnits','inches','PaperSize',[Width Height],'PaperPosition',[0,0,Width,Height],...
         'Units','inches','Position',[1 4,Width,Height]);
@@ -411,10 +411,10 @@ set(Figure2,'defaulttextinterpreter','latex')
 
 [Ys Xs]=size(JPDFs);  
 
-Contours=[.001 .002 .005 .01 .02]; 
-for P=1:length(Contours)
-    ContLabel{P}=num2str(Contours(P),'%.4f');
-end
+% Contours=[.001 .002 .005 .01 .02]; 
+% for P=1:length(Contours)
+%     ContLabel{P}=num2str(Contours(P),'%.4f');
+% end
 
 %cbot=3*log(Contours(1))/2-log(Contours(2))/2;
 %        ctop=log(Contours(length(Contours)));
@@ -439,31 +439,31 @@ Yax=linspace(0,1,PDFsize).^Exp;
                 Mean2=JPDFs(Y,X).Mean2;
             end
             
-%             %Want Contours at 99, 95, 90 85 80 70%
-%             Precents=[.90 .80 .70 .50 .30];
-%             %Make CDF(ish)thing
-%             ThreshPDF=JPDF; 
-%             CDF=[];
-%             ProbFunc=[0:.0001:.9999];
-%             for Cnt=1:length(ProbFunc)
-%                 ThreshPDF(ThreshPDF<ProbFunc(Cnt))=0;CDF(Cnt)=sum(ThreshPDF(:));
-%             end
-%             %plot(ProbFunc,CDF,'*')
-%             
-%             Contours=[];
-%             ContLabel={};
-%             for P=1:length(Precents)
-%                 Index=find(CDF<Precents(P), 1, 'first');
-%                 Contours(P)=ProbFunc(Index);
-%                 ContLabel{P}=num2str(ProbFunc(Index),'%.4f');
-%             end
+            %Want Contours at 99, 95, 90 85 80 70%
+            Precents=[.80 .60 .40 .20];
+            %Make CDF(ish)thing
+            ThreshPDF=JPDF; 
+            CDF=[];
+            ProbFunc=[0:.0001:.9999];
+            for Cnt=1:length(ProbFunc)
+                ThreshPDF(ThreshPDF<ProbFunc(Cnt))=0;CDF(Cnt)=sum(ThreshPDF(:));
+            end
+            %plot(ProbFunc,CDF,'*')
+            
+            Contours=[];
+            ContLabel={};
+            for P=1:length(Precents)
+                Index=find(CDF<Precents(P), 1, 'first');
+                Contours(P)=ProbFunc(Index);
+                ContLabel{P}=num2str(ProbFunc(Index),'%.4f');
+            end
              cbot=log(Contours(1));
              ctop=log(Contours(length(Contours)));
             
             %This gets rid of that outer annoying line.
             JPDF(JPDF<Contours(1))=0;
             
-            subaxis(3*6,Xs*6,X*6-4,Y*6-5,5,5,'Spacing', 0, 'Padding', 0,'PaddingRight',MG,'PaddingTop',MG, 'Margin', 2*MG,'MarginRight',4*MG);
+            subaxis(3*6,Xs*6,X*6-4,Y*6-5,5,5,'Spacing', 0, 'Padding', 0,'PaddingRight',MG,'PaddingTop',MG, 'Margin', 2*MG,'MarginRight',MG);
                 contourf(Xax,Yax, log(JPDF),log(Contours));hold on;
                     plot([Mean2 Mean2].^Exp,[0 1],'b');
                     plot([0 1],[Mean1 Mean1].^Exp,'b');hold off;
@@ -477,28 +477,38 @@ Yax=linspace(0,1,PDFsize).^Exp;
                     hc=colorbar('FontSize',10,'Location','East','YTick',log(Contours),'YTickLabel',ContLabel);
                     cPos=get(hc,'Position');
                     set(hc,'Position',[cPos(1)+cPos(3)/2,cPos(2),cPos(3)/2,cPos(4)])
-    
+            if Y==1;title(['$x^*=$' num2str(JPDFs(Y,X).Xnorm)]);end
             Max1=ceil(max(sum(JPDF))*10)/10;
             Max2=ceil(max(sum(JPDF'))*10)/10;
             MAX=max(Max1,Max2);
             subaxis(3*6,Xs*6,X*6-4,Y*6,5,1,'Spacing', 0,'Padding', MG,'PaddingTop',0,'PaddingLeft',0);
                 plot(Xax,sum(JPDF),'k');hold on;
                 plot([Mean2 Mean2].^Exp,[0 1],'b');hold off;
-                set(gca,'XTick',linspace(0,1,6).^Exp,...
+
+                        %axis([0 1 0 MAX*4/3]);
+                        axis([0 1 0 Max1]);
+                if Y==3;
+                    xlabel('$\Phi_2$');
+                    set(gca,'XTick',linspace(0,1,6).^Exp,...
                         'XTickLabel',linspace(0,1,6),...
                         'YAxisLocation','left','YScale','linear',...
-                        'YTick',MAX);
-                        %'YTick',[]);
-                        axis([0 1 0 MAX*4/3]);
-                if Y==3;xlabel('$\Phi_2$');end;
+                        'YTick',[]);
+                        %'YTick',MAX);
+                else set(gca,'XTick',[],'YTick',[]);
+                end;
+                
             subaxis(3*6,Xs*6,X*6-5,Y*6-5,1,5,'Spacing', 0,'Padding', MG,'PaddingRight',0,'PaddingBottom',0);
                 plot(sum(JPDF'),Yax,'k');hold on;
                 plot([0 1],[Mean1 Mean1].^Exp,'b');hold off;
                  
-                if X==1;ylabel('$\Phi_1$');end
-                set(gca,'YTick',linspace(0,1,6).^Exp,...
+                if X==1;
+                    ylabel('$\Phi_1$');
+                    set(gca,'YTick',linspace(0,1,6).^Exp,...
                         'YTickLabel',linspace(0,1,6),...
-                        'XTick',MAX,'XTickLabel',[]);axis([0 MAX*4/3 0 1]);
+                        'XTick',MAX,'XTickLabel',[]);axis([0 Max2 0 1]);
+                else set(gca,'XTick',[],'YTick',[]);
+                end
+                
         end
     end
     
@@ -512,5 +522,5 @@ Yax=linspace(0,1,PDFsize).^Exp;
    % c=colorbar ('FontSize',12,'YTick',log(Contours),'YTickLabel',Contours);
 
 
-    print('-dpdf','-r500',['Vars/Eps' sprintf('%.3f', eps) '/' TitleTxt '_PDF_.pdf'])
+    print('-dpdf','-r500',['Vars/Eps' sprintf('%.3f', eps) '/' TitleTxt '_PDF_many.pdf'])
 

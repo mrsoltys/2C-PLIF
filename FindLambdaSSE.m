@@ -25,6 +25,7 @@ disp(['Finding Lambda Using Imgs ' int2str(Start) '-' int2str(Stop)]);
         D1=I1; D2=I2;
 
 %% Find Lambda for Each Individual Image
+
 for i=Start:Stop
     %Initialize empty Lambda Vectors    
         L1=[]; L2=[]; C2m=[]; C1m=[];
@@ -35,7 +36,11 @@ for i=Start:Stop
     % Convert to Double
         I1=double( I1 );
         I2=double( I2 );
-        
+%         subaxis(1,2,1);
+%             imagesc(I1);axis image;title('Camera1');colorbar('Location','SouthOutside');
+%         subaxis(1,2,2);
+%             imagesc(I2);axis image;title('Camera2');colorbar('Location','SouthOutside');            
+%         pause;
     % Calc Background for image i
         B1=B1a*(Stop-i)/(Stop-Start) + B1b*(i-Start)/(Stop-Start);
         B2=B2a*(Stop-i)/(Stop-Start) + B2b*(i-Start)/(Stop-Start);
@@ -73,16 +78,24 @@ for i=Start:Stop
         
         %Make filter matrix that is 1 everywhere that I1>LowThresh and NaN
         %everywhere else.
-        filter1=double(I1>LowThresh1)./((I1>LowThresh1)~=0);     
-        filter2=double(I2>LowThresh2)./((I2>LowThresh2)~=0);   
-            %Note: I should make it so if the filters both contain 1's in
+        filter1=double(I1>LowThresh1)./((I1>LowThresh1)~=0).*double(I1<HiThresh1)./((I1<HiThresh1)~=0);     
+        filter2=double(I2>LowThresh2)./((I2>LowThresh2)~=0).*double(I2<HiThresh2)./((I2<HiThresh2)~=0);  
+%         subaxis(1,2,1);
+%             imagesc(filter1);axis image;title('filter1');colorbar('Location','SouthOutside');
+%         subaxis(1,2,2);
+%             imagesc(filter2);axis image;title('filter2');colorbar('Location','SouthOutside');            
+%         pause;
+
+        %Note: I should make it so if the filters both contain 1's in
             %the same pixel (overlap?) it removes those points (sets to
             %nans)
        % Overlap=double(( (filter1+filter2)>0 )==0 )./...
        %         double(( (filter1+filter2)>0 )==0 );
        % filter1=filter1.*Overlap;
        % filter2=filter2.*Overlap;
-    %% Find Lambda1         
+
+%% Find Lambda1.  Check to see if this is a picture from Camera1 or Camera 2 
+%    by comparing the image to the mean? Is there a better way to do this?         
        % if( ( mean2(I1) > (mean2(B1)-3*std2(B1)) ) && ( mean2(I1)< (mean2(B1)+3*std2(B1)) ) )
         if( ( (mean2(I1)+.5*std2(I1)) > (mean2(B1)-3*std2(B1)) ) && ( (mean2(I1)+.5*std2(I1))< (mean2(B1)+3*std2(B1)) ) )
             % if the image is a blank (the mean  +- 2 std dev of
@@ -93,7 +106,7 @@ for i=Start:Stop
 %                 Cb2=(B2-B2)./...
 %                     (B2-D2).*...
 %                     filter1;
-            
+
                 %First calculate with Lambda1=0
                 L1(1)=0;
                 C2=(I2-B2)./...
@@ -105,7 +118,7 @@ for i=Start:Stop
                 %C2m(1)=(sum(n.*xout) / sum(n))^2;
                 
                 %calculate with Lambda1=0.01
-                L1(2)=.01;
+                L1(2)=.001;
                 C2=(I2-B2-L1(2)*(I1-B1))./...
                    (B2-D2-L1(2)*(B1-D1)).*...
                    filter1;
@@ -115,7 +128,7 @@ for i=Start:Stop
 %                 C2m(2)=(sum(n.*xout) / sum(n) )^2;
                 
                 %%calculate with Lambda1=-0.01
-                L1(3)=-.01;  
+                L1(3)=-.001;  
                 C2=(I2-B2-L1(3)*(I1-B1))./...
                    (B2-D2-L1(3)*(B1-D1)).*...
                    filter1;
@@ -129,7 +142,7 @@ for i=Start:Stop
            
             %loop while the sse is greater than some acceptable value, but
             %no more than 30 iterations
-            while(abs(L1(j)-L1(j-1))>(1e-5) && j<30)
+            while(abs(L1(j)-L1(j-1))>(1e-6) && j<30)
                 %Increment
                     j=j+1;
                 %Interpolate next guess
@@ -146,7 +159,8 @@ for i=Start:Stop
                 C2m(j)=sum(sum(C2.^2));
 %                     [n xout]=hist(C2(:),100);
 %                     C2m(j)=(sum(n.*xout) / sum(n))^2;
-                    %plot(L1,C2m,'*')
+            %        plot(L1,C2m,'*');hold on;
+            %        plot(L1,polyval(Reg,L1),'k*');hold off;
             end
 
             L1=L1(j);
@@ -168,10 +182,10 @@ for i=Start:Stop
                     filter2;
                 C1(isnan(C1))=0; %get rid of NaNs
                 C1m(1)=sum(sum(C1.^2));
-%                 [n xout]=hist(C1(:),100);
-%                 C1m(2)=(sum(n.*xout) / sum(n) )^2;
+                [n xout]=hist(C1(:),100);
+                C1m(2)=(sum(n.*xout) / sum(n) )^2;
                 
-             L2(2)=.01;
+             L2(2)=.001;
                 C1=(I1-B1-L2(2)*(I2-B2))./...
                    (B1-D1-L2(2)*(B2-D2)).*...
                    filter2;
@@ -180,18 +194,20 @@ for i=Start:Stop
 %                 [n xout]=hist(C1(:),100);
 %                 C1m(2)=(sum(n.*xout) / sum(n) )^2;
                 
-                L2(3)=-.01;                
+                L2(3)=-.001;                
                 C1=(I1-B1-L2(3)*(I2-B2))./...
                    (B1-D1-L2(3)*(B2-D2)).*...
                    filter2;
                 C1(isnan(C1))=0; %get rid of NaNs
                 C1m(3)=sum(sum(C1.^2));
+               
 %                 [n xout]=hist(C1(:),100);
 %                 C1m(2)=(sum(n.*xout) / sum(n) )^2;
                 
+
             % Set Index for While Loop    
             j=3;
-            while(abs(L2(j)-L2(j-1))>(1e-5) && j<30)
+            while(abs(L2(j)-L2(j-1))>(1e-6) && j<30)
                 %Increment
                     j=j+1;
                 %Interpolate next guess
@@ -206,7 +222,7 @@ for i=Start:Stop
                 C1m(j)=sum(sum(C1.^2));
 %               [n xout]=hist(C1(:),100);
 %               C1m(2)=(sum(n.*xout) / sum(n) )^2;
-                    %plot(L2,C1m,'*')
+                   % plot(L2,C1m,'*')
             end
             L2=L2(j);
 
