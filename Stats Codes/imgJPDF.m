@@ -1,4 +1,4 @@
-function [JPDFs]=PDF2d(Direct, Start, Stop, JPDFs, Box, eps)
+function [JPDFs]=imgJPDF(img, eps)
 %--------------------------------------------------------------------------------%
 % Note Box is [r c]
 %
@@ -25,7 +25,7 @@ function [JPDFs]=PDF2d(Direct, Start, Stop, JPDFs, Box, eps)
 % NOTE code prob should be modified so if only 1 Start and Stop is given,
 % it doesn't look at location
 %--------------------------------------------------------------------------------%
-    if nargin == 5
+    if nargin == 1
         eps = -Inf;
     end
 
@@ -37,9 +37,16 @@ Centers=linspace(0,1,125);
 %Centers=0:.01:1;
     Cs(1)={Centers};
     Cs(2)={Centers};
+    
+%
+                C1s=C1(b:t,l:r);C1s(C1s<eps)=0;
+                C2s=C2(b:t,l:r);C2s(C2s<eps)=0;
+
+                % create histogram for each Box and add it to the JPDF
+                Hist(:,:)=hist3([C1s(:),C2s(:)],Cs);
 
 % Get size of the XYpts matrix    
-[Ys, Xs]=size(JPDFs);    
+[Ys Xs]=size(JPDFs);    
 
 % Initilize N. first two dimentions are a PDF for a single x and Y point.
 % The second 2 dimentions will specify the X and Y point for that PDF.
@@ -54,7 +61,7 @@ ind=1;
 while ind<=length(Start)
     Str=Start(ind);Stp=Stop(ind);
     %Load Means
-        load(['Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' sprintf('%05d', Start(ind)) '-' sprintf('%05d', Stop(ind))], 'mean1', 'mean2', 'RMSE1', 'RMSE2', 'Cov', 'C1C2');   
+        load([Direct 'Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' sprintf('%05d', Start(ind)) '-' sprintf('%05d', Stop(ind))], 'mean1', 'mean2', 'RMSE1', 'RMSE2', 'Cov', 'C1C2');   
         Mean1=mean1; Mean2=mean2;
     %Load RMS
     %    load([Direct 'Vars/Eps' sprintf('%.3f', eps) '/RMSEe' sprintf('%05d', Start(ind)) '-' sprintf('%05d', Stop(ind))], );   
@@ -64,14 +71,14 @@ while ind<=length(Start)
         for Y=1:Ys
             if(JPDFs(Y,X).Loc==ind) % check to make sure we're in the right image
                 % How many Counts will PDF have? 
-                JPDFs(Y,X).Ncounts=(Box(1)+1)*(Box(2)+1)*(Stp-Str+1);
+                JPDFs(Y,X).Ncounts=Box(1)*Box(2)*(Stp-Str+1);
                 JPDFs(Y,X).JPDF=zeros(length(Centers), length(Centers));
                 
                 %Define Box that JPDF is defined for
-                l=round(JPDFs(Y,X).Xpix-Box(2)/2);
-                r=round(JPDFs(Y,X).Xpix+Box(2)/2);
-                b=round(JPDFs(Y,X).Ypix-Box(1)/2);
-                t=round(JPDFs(Y,X).Ypix+Box(1)/2);
+                l=JPDFs(Y,X).Xpix-floor(Box(2)/2);
+                r=JPDFs(Y,X).Xpix+floor(Box(2)/2);
+                b=JPDFs(Y,X).Ypix-floor(Box(1)/2);
+                t=JPDFs(Y,X).Ypix+floor(Box(1)/2);
                 
                 % Add in the Stats for box
                 JPDFs(Y,X).Mean1=mean(mean( Mean1(b:t,l:r) ));
@@ -86,8 +93,6 @@ while ind<=length(Start)
     ind=ind+1;
 end
 
-%Free up some memory...
-clear('Mean1','mean1','Mean2','mean2','RMSE1', 'RMSE2', 'Cov', 'C1C2');
 
 %% For Progress Bar
 Length=sum(Stop-Start)+length(Start)-1;
@@ -102,13 +107,13 @@ while ind<=length(Start)
     for X=1:Xs
         for Y=1:Ys
             if(JPDFs(Y,X).Loc==ind) % check to make sure we're in the right image              
-                load([Direct 'ProcImgs/Proc' sprintf('%05d', i)],'C1','C2');
+                load([Direct 'ProcImgs/Proc' sprintf('%05d', i)],'C1','C2')
 
                 %Define Box that JPDF is defined for
-                l=round(JPDFs(Y,X).Xpix-Box(2)/2);
-                r=round(JPDFs(Y,X).Xpix+Box(2)/2);
-                b=round(JPDFs(Y,X).Ypix-Box(1)/2);
-                t=round(JPDFs(Y,X).Ypix+Box(1)/2);
+                l=JPDFs(Y,X).Xpix-floor(Box(2)/2);
+                r=JPDFs(Y,X).Xpix+floor(Box(2)/2);
+                b=JPDFs(Y,X).Ypix-floor(Box(1)/2);
+                t=JPDFs(Y,X).Ypix+floor(Box(1)/2);
                 
                 %Define Each Box
                 C1s=C1(b:t,l:r);C1s(C1s<eps)=0;
@@ -143,9 +148,8 @@ for X=1:Xs
     end
 end
 
-save(['Vars/Eps' sprintf('%.3f', eps) '/PDF2d' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'JPDFs');   %Proc Mean
+save([Direct 'Vars/Eps' sprintf('%.3f', eps) '/PDF2d' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'JPDFs');   %Proc Mean
 
 % stop matlabpool
 %matlabpool close
-end
  

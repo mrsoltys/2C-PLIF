@@ -11,22 +11,28 @@ function JetVORescale(USstart, USstop, DSstart, DSstop, eps, Xshift,Expon, NAME)
         USMeanName=[ sprintf('%05d', USstart) '-'  sprintf('%05d', USstop)];
             load(['Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' USMeanName]);
                 USmean1=mean1;USmean2=mean2;                
-                [USr USc]=size(mean1);
+                [USr, USc]=size(mean1);
            % load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' USMeanName]);
-                USC1C2=C1C2;USCov=Cov;
+            %    USC1C2=C1C2;USCov=Cov;
             %load(['Vars/Eps' sprintf('%.3f', eps) '/RMSEe' USMeanName]);
-                USRMSE1=RMSE1;USRMSE2=RMSE2;
+            %    USRMSE1=RMSE1;USRMSE2=RMSE2;
 
     % Load DS stats;
         DSMeanName=[ sprintf('%05d', DSstart) '-'  sprintf('%05d', DSstop)];
             load(['Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' DSMeanName]);
                 DSmean1=mean1;DSmean2=mean2;                
-                [DSr DSc]=size(mean1);
+                [DSr, DSc]=size(mean1);
            %load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' DSMeanName]);
-                DSC1C2=C1C2;DSCov=Cov;
+           %     DSC1C2=C1C2;DSCov=Cov;
            % load(['Vars/Eps' sprintf('%.3f', eps) '/RMSEe' DSMeanName]);
-               DSRMSE1=RMSE1;DSRMSE2=RMSE2;
-                
+           %    DSRMSE1=RMSE1;DSRMSE2=RMSE2;
+    % Preallocate for Speed
+        Usigma1 = zeros(1,USc);   Usigma2 = zeros(1,USc);
+        UMu1    = zeros(1,USc);   UMu2    = zeros(1,USc);
+        USA1    = zeros(1,USc);   USA2    = zeros(1,USc);
+        Dsigma1 = zeros(1,USc);   Dsigma2 = zeros(1,USc);
+        DMu1    = zeros(1,USc);   DMu2    = zeros(1,USc);
+        DSA1    = zeros(1,USc);   DSA2    = zeros(1,USc);
     % Run through Means, Fit Gaussians.
         for i=1:USc
             [Usigma1(i),UMu1(i),USA1(i)]=mygaussfit(1:USr ,USmean1(:,i));
@@ -39,16 +45,16 @@ function JetVORescale(USstart, USstop, DSstart, DSstop, eps, Xshift,Expon, NAME)
         %figure(2);subplot(1,2,1);plot(1:USc,(UMu1+UMu2)./2,'k-');hold on;
         %subplot(1,2,2);plot(1:DSc,(DMu1+DMu2)./2,'k-');hold on;
 % This is also the time to consider Rotating the images...    
-% Fit line to centerline data
+    % Straignen based on centerline angle.
         USCL=(UMu1+UMu2)./2;
-        [p1,S1] = polyfit((USc-3):-1:1,USCL(2:(USc-2)),1);Ang1=-double(atan(p1(1))*180/pi());
+        [p1] = polyfit((USc-3):-1:1,USCL(2:(USc-2)),1);Ang1=-double(atan(p1(1))*180/pi());
             USmean1r=imrotate(USmean1,Ang1,'crop');
             USmean2r=imrotate(USmean2,Ang1,'crop');
         DSCL=(DMu1+DMu2)./2;
-        [p2,S2] = polyfit((DSc-3):-1:1,DSCL(2:(DSc-2)),1);Ang2=-double(atan(p2(1))*180/pi());
+        [p2] = polyfit((DSc-3):-1:1,DSCL(2:(DSc-2)),1);Ang2=-double(atan(p2(1))*180/pi());
             DSmean1r=imrotate(DSmean1,Ang2,'crop');
             DSmean2r=imrotate(DSmean2,Ang2,'crop');
-            
+    % Run through Means, Fit Gaussians.
         for i=1:USc
             [Usigma1(i),UMu1(i),USA1(i)]=mygaussfit(1:USr ,USmean1r(:,i));
             [Usigma2(i),UMu2(i),USA2(i)]=mygaussfit(1:USr ,USmean2r(:,i));
@@ -75,8 +81,8 @@ function JetVORescale(USstart, USstop, DSstart, DSstop, eps, Xshift,Expon, NAME)
         RegStuff(1,:) = [USc:-1:1 (DSc:-1:1)+(USc-Xshift)];
         RegStuff(2,:) = [Usigma1 Dsigma1];
         RegStuff(3,:) = [Usigma2 Dsigma2];
-        RegStuff(4,:) = [UMu1 DMu1];
-        RegStuff(5,:) = [UMu2 DMu2];
+        RegStuff(4,:) = [UMu1-UScent DMu1-DScent];
+        RegStuff(5,:) = [UMu2-UScent DMu2-DScent];
         RegStuff(6,:) = [USA1 DSA1.*DSscale1];
         RegStuff(7,:) = [USA2 DSA2.*DSscale2];
         RegStuff=sortrows(RegStuff',1)';
@@ -88,13 +94,18 @@ L=length(RegStuff);
 % itself...
 figure(1);clf;
 subaxis(2,1,1);
-    imshow(ColorChangeWhite(fliplr(USmean1r)/max(USmean1r(:)),fliplr(USmean2r)/max(USmean2r(:))));hold on;
-        plot(1:USc,RegStuff(4,1:USc),'k');
-        plot(1:USc,RegStuff(5,1:USc),'k');
-        plot(1:USc,RegStuff(4,1:USc)+RegStuff(2,1:USc),'k--');
-        plot(1:USc,RegStuff(4,1:USc)-RegStuff(2,1:USc),'k--');
-        plot(1:USc,RegStuff(5,1:USc)+RegStuff(3,1:USc),'k--');
-        plot(1:USc,RegStuff(5,1:USc)-RegStuff(3,1:USc),'k--');hold off;
+    USXdat=[1,USc];USYdat=[1,USr]-UScent;
+    imshow(ColorChangeWhite(fliplr(USmean1r)/max(USmean1r(:)),fliplr(USmean2r)/max(USmean2r(:))),'XData',USXdat,'YData',USYdat);hold on;
+    DSXdat=[USc-Xshift+1,USc-Xshift+DSc];DSYdat=[1,DSr]-DScent;
+    imshow(ColorChangeWhite(fliplr(DSmean1r)*DSscale1,fliplr(DSmean2r)*DSscale2),'XData',DSXdat,'YData',DSYdat);
+        plot([0 2*USc],[0 0],'k-');
+        plot(RegStuff(4,:),'k.');
+        plot(RegStuff(5,:),'k.');
+        plot(RegStuff(4,:)+RegStuff(2,:),'k.');
+        plot(RegStuff(4,:)-RegStuff(2,:),'k.');
+        plot(RegStuff(5,:)+RegStuff(3,:),'k.');
+        plot(RegStuff(5,:)-RegStuff(3,:),'k.');hold off;
+        axis([USXdat(1) DSXdat(2) USYdat(1) USYdat(2)]);
 
 % (2) Match the 1/C profiles between scalars so there is symmetry DS
     midReg=(1./(RegStuff(6,:))+1./(RegStuff(7,:)))/2;
@@ -109,19 +120,21 @@ subaxis(2,1,2);
       % Plot Jet Spreading (Sigma) vs x values.    
         %plot(RegStuff(1,:),1./CLmax1(:),'r');hold on;
         %plot(RegStuff(1,:),1./CLmax2(:),'b')
-        plot(RegStuff(1,:), midReg(:)  ,'g');axis([1 length(midReg) 0 midReg(length(midReg))]);hold on;
+        plot(RegStuff(1,:), midReg(:)  ,'g.');axis([1 length(midReg) 0 midReg(length(midReg))]);hold on;
     
 % (1) Find VO using 1/C
 
-    % Fit line to spreading data
+        % Fit line to spreading data
         [po,So] = polyfit(RegStuff(1,:),midReg,1);
         %[p1,S1] = polyfit(RegStuff(1,:),1./CLmax1(1,:),1)
         %[p2,S2] = polyfit(RegStuff(1,:),1./CLmax2(1,:),1)
-        %po=(p1+p2)./2;                                                     % Average both lines, their VO should be the same
+        %po=(p1+p2)./2;  
+        
+        % Calculate the errors
         [FitYs,delta] = polyval(po,RegStuff(1,:),So) ;
         OldVO=-po(2)/po(1);                                                % Virtual Origin is X-intercept
         
-        plot(RegStuff(1,:),FitYs,'k');
+        plot(RegStuff(1,:),FitYs,'k-');
         plot(RegStuff(1,:),FitYs+delta,'k--');
         plot(RegStuff(1,:),FitYs-delta,'k--');
         
@@ -147,16 +160,70 @@ subaxis(2,1,2);
                 error=abs(NewVO-OldVO);
                 OldVO=NewVO;
 
-                plot(RegStuff(1,:),FitYs,'k');hold on;
-                plot(RegStuff(1,:),midReg,'g');hold off;
+                plot(RegStuff(1,:),FitYs,'k:');hold on;
+                %[FitYs,delta] = polyval(po,RegStuff(1,:),So) ;
+                %plot(RegStuff(1,:),FitYs+delta,'k--');
+                %plot(RegStuff(1,:),FitYs-delta,'k--');
+                %plot(RegStuff(1,:),midReg,'g');hold off;
+                %error
+                
+                
            end
            
         VO=NewVO
+        VOr=round(VO);
         
 %Need to measure S (Distance between centers) at VO (+/-15 around VO?)
 %load(['Vars/Eps' sprintf('%.3f', eps) '/VOetc' NAME],'S');
         %S=mean(abs(RegStuff(4,round(VO-15):round(VO+15))-RegStuff(5,round(VO-15):round(VO+15))));
-        S=trimmean(abs(RegStuff(4,1:round(VO))-RegStuff(5,1:round(VO))),20)
+        S=trimmean(abs(RegStuff(4,1:VOr)-RegStuff(5,1:VOr)),20)
+        
+%Make Setup Figure
+
+        FigW=13.49414;
+        FigH=21.08462*.4;
+
+        set(0,'DefaultTextFontSize', 10)
+        set(0,'DefaultTextFontname', 'Times New Roman')
+        set(0,'DefaultAxesFontSize', 8)
+        set(0,'DefaultAxesFontName','Times New Roman')
+
+
+        Figure2=figure(2);clf;
+            set(Figure2,'defaulttextinterpreter','latex')
+            set(Figure2,'PaperUnits','centimeters','PaperSize',[FigW FigH],'PaperPosition',[0,0,FigW,FigH],...
+            'Units','centimeters','Position',[1,9,FigW,FigH]);
+    
+        imshow(ColorChangeWhite(fliplr(USmean1r)/max(USmean1r(:)),fliplr(USmean2r)/max(USmean2r(:))),'XData',USXdat,'YData',USYdat);hold on;
+        hold on;
+            plot([1 2500],[S/2 S/2],'k--')
+            plot([1 2500],[-S/2 -S/2],'k--')
+            arrow([VOr/2,-S/2],[ VOr/2,S/2],'Ends','Both','Length',10)
+            arrow([VOr,0],[VOr+100,0],'Length',10)
+            arrow([VOr,0],[VOr,100],'Length',10)
+            
+            
+            [figx,figy] = dsxy2figxy([VOr/2, VOr/2],[-S/2,S/2])
+            annotation('doublearrow',figx,figy)
+            [figx,figy] = dsxy2figxy([VOr, VOr+50],[0,0])
+            annotation('arrow',figx,figy)
+            [figx,figy] = dsxy2figxy([VOr, VOr],[0,50])
+            annotation('arrow',figx,figy)
+            [figx,figy] = dsxy2figxy([VOr, VOr+50],[0,0])
+            annotation
+%                    RegStuff(2,:) = [Usigma1 Dsigma1];
+%               RegStuff(3,:) = [Usigma2 Dsigma2];
+
+            %[po] = polyfit(RegStuff(1,VOr:L),RegStuff(2,VOr:L),1);
+            %[FitYs] = polyval(po,RegStuff(1,VOr:L)) ;
+            %plot(RegStuff(1,VOr:L),S/2+FitYs,'b:')
+            %plot(RegStuff(1,VOr:L),S/2-FitYs,'b:')
+            
+            %[po] = polyfit(RegStuff(1,VOr:L),RegStuff(3,VOr:L),1);
+            %[FitYs] = polyval(po,RegStuff(1,VOr:L)) ;
+            %plot(RegStuff(1,VOr:L),-S/2+FitYs,'r:')
+            %plot(RegStuff(1,VOr:L),-S/2-FitYs,'r:')
+            
 %Need to set S to 1 of 2 values.
 load(['Vars/PreRunVars'],'Scale');
 if S/Scale<2

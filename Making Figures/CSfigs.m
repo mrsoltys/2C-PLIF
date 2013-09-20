@@ -1,4 +1,7 @@
 function [VO CSxdat CSmean1 CSmean2 CSs CSrho CSc1c2 CScov] = CSfigs(USstart, USstop, DSstart, DSstop, eps, Xshift,Expon, NAME,Symbol,Pos)
+
+
+
 BS=30
 load(['Vars/Eps' sprintf('%.3f', eps) '/VOetc' NAME],'VO','S','USycent','DSycent','Yshift','USXData','USYData','DSXData','DSYData','Ang1','Ang2');
 load(['Vars/PreRunVars'],'Scale');
@@ -37,18 +40,19 @@ load(['Vars/PreRunVars'],'Scale');
         USs=USCov./(USmean1.*USmean2);
         DSs=DSCov./(DSmean1.*DSmean2);
         
- % Would like to use X locations WITH UNITS
-    XDatUS=linspace(USXData(1), USXData(2), USc)*S/Scale; 
-    XDatDS=linspace(DSXData(1), DSXData(2), DSc)*S/Scale;
+ % Would like to use X locations 
+    XDatUS=linspace(USXData(1), USXData(2), USc);%*S/Scale; 
+    XDatDS=linspace(DSXData(1), DSXData(2), DSc);%*S/Scale;
  % Would like to use UNITLESS Y dimensions
     YDatUS=linspace(USYData(1), USYData(2), USr); 
     YDatDS=linspace(DSYData(1), DSYData(2), DSr);
         
   if S/Scale<2
-      Xpts=[5 10 15 20]
+      Xpts=[2.5 5 10 20]
   else
-      Xpts=[2.5 5 7.5 10]
+      Xpts=[2.5 5 10]
   end
+  
         USptsL=find(Xpts>((XDatUS(1)+XDatDS(DSc))/2),1,'first')-1;
         DSptsL=find(Xpts>XDatDS(1),1,'first')-1;
         if(isempty(USptsL));
@@ -62,25 +66,26 @@ load(['Vars/PreRunVars'],'Scale');
     for i=1:length(Xpts)
         if S/Scale<2
             if i==1
-                Symbol='s--';
+                Symbol='s';
             elseif i==2
-                Symbol='o-';
+                Symbol='o';
             elseif i==3
-                Symbol='+';
+                Symbol='^';
             elseif i==4
                 Symbol='^';
             end
         else
             if i==1
-                Symbol='p:';
+                Symbol='s';
             elseif i==2
-                Symbol='s--';
+                Symbol='o';
             elseif i==3
-                Symbol='v-.';
+                Symbol='^';
             elseif i==4
-                Symbol='o-';
+                Symbol='o';
             end
         end
+        
         if i<=USptsL
             % Find the real pixel of the X point
             if USXData(2) > Xpts(i) % Need Check to see if the VO is on the screen.
@@ -91,11 +96,25 @@ load(['Vars/PreRunVars'],'Scale');
             %Find the gaussian
 
             % Bin means 
-                [mean1Bin BinYs]   = AverageBins( mean( USmean1(:,ceil(Col-BS/2):floor(Col+BS/2)) , 2 ) ,YDatUS,BS);
-                [mean2Bin BinYs]   = AverageBins( mean( USmean2(:,ceil(Col-BS/2):floor(Col+BS/2)) , 2 ) ,YDatUS,BS);
+                Mean1t = mean( USmean1(:,ceil(Col-BS/2):floor(Col+BS/2)) , 2 );
+                Mean2t = mean( USmean2(:,ceil(Col-BS/2):floor(Col+BS/2)) , 2 );
+                [mean1Bin BinYs]   = AverageBins( Mean1t ,YDatUS,BS);
+                [mean2Bin BinYs]   = AverageBins( Mean2t ,YDatUS,BS);
+                
                 hold on;
-                    plot(mean1Bin,BinYs,['b' Symbol],'MarkerSize',4);
-                    plot(mean2Bin,BinYs,['r' Symbol],'MarkerSize',4);
+                    [sigma,mu,A]=mygaussfit(YDatUS,Mean1t,.05);
+                        mean1gauss(i).sigma=sigma;
+                        mean1gauss(i).mu=mu;
+                        mean1gauss(i).A=A;
+                    plot(A * exp( -(YDatUS-mu).^2 ./ (2*sigma^2) ),YDatUS,'-','Color', [.7,.7,1]);
+                    [sigma,mu,A]=mygaussfit(YDatUS,Mean2t,.05);
+                        mean2gauss(i).sigma=sigma;
+                        mean2gauss(i).mu=mu;
+                        mean2gauss(i).A=A;
+                    plot(A * exp( -(YDatUS-mu).^2 ./ (2*sigma^2) ),YDatUS,'-','Color', [1,.7,.7]); 
+                    
+                    plot(mean1Bin,BinYs,[Symbol],'MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',3);
+                    plot(mean2Bin,BinYs,[Symbol],'MarkerEdgeColor','r','MarkerFaceColor','r','MarkerSize',3);
                 hold off;
                 CSmean1(i,:)=mean1Bin;
                 CSmean2(i,:)=mean2Bin;
@@ -124,11 +143,28 @@ load(['Vars/PreRunVars'],'Scale');
             
             
              % Bin means 
-                [mean1Bin BinYs]   = AverageBins( mean( DSmean1(:,ceil(Col-BS/2):floor(Col+BS/2)) , 2 ) ,YDatDS,BS);
-                [mean2Bin BinYs]   = AverageBins( mean( DSmean2(:,ceil(Col-BS/2):floor(Col+BS/2)) , 2 ) ,YDatDS,BS);
+            % Bin means 
+                Mean1t = mean( DSmean1(:,ceil(Col-BS/2):floor(Col+BS/2)) , 2 );
+                Mean2t = mean( DSmean2(:,ceil(Col-BS/2):floor(Col+BS/2)) , 2 );
+                [mean1Bin BinYs]   = AverageBins( Mean1t ,YDatDS,BS);
+                [mean2Bin BinYs]   = AverageBins( Mean2t ,YDatDS,BS);
+                
                 hold on;
-                plot(mean1Bin,BinYs,['b' Symbol],'MarkerSize',4);
-                plot(mean2Bin,BinYs,['r' Symbol],'MarkerSize',4);
+                    [sigma,mu,A]=mygaussfit(YDatDS,Mean1t,.05);
+                        mean1gauss(i).sigma=sigma;
+                        mean1gauss(i).mu=mu;
+                        mean1gauss(i).A=A;
+                    plot(A * exp( -(YDatDS-mu).^2 ./ (2*sigma^2) ),YDatDS,'-','Color', [.7,.7,1]);
+                    [sigma,mu,A]=mygaussfit(YDatDS,Mean2t,.05);
+                        mean2gauss(i).sigma=sigma;
+                        mean2gauss(i).mu=mu;
+                        mean2gauss(i).A=A;
+                    plot(A * exp( -(YDatDS-mu).^2 ./ (2*sigma^2) ),YDatDS,'-','Color', [1,.7,.7]); 
+                    
+                    plot(mean1Bin,BinYs,[Symbol],'MarkerEdgeColor','b','MarkerFaceColor','b','MarkerSize',3);
+                    plot(mean2Bin,BinYs,[Symbol],'MarkerEdgeColor','r','MarkerFaceColor','r','MarkerSize',3);
+                    
+
                 hold off;
                 CSmean1(i,:)=mean1Bin;
                 CSmean2(i,:)=mean2Bin;
@@ -155,4 +191,4 @@ load(['Vars/PreRunVars'],'Scale');
         end
     end
             
-    save(['Vars/Eps' sprintf('%.3f', eps) '/BinnedCSStats' NAME],'CSys','CSmean1','CSmean2','CSrms1','CSrms2','CSs','CSrho','CSc1c2','CScov');
+    save(['Vars/Eps' sprintf('%.3f', eps) '/BinnedCSStats' NAME],'CSys','CSmean1','CSmean2','CSrms1','CSrms2','CSs','CSrho','CSc1c2','CScov','mean1gauss','mean2gauss');

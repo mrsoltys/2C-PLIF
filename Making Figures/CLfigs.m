@@ -46,8 +46,13 @@ load(['Vars/Eps' sprintf('%.3f', eps) '/VOetc' NAME],'VO','S','USycent','DSycent
         [DSmean1Bin DSxs]   = AverageBins(mean(  DSmean1(ceil(DScl-BS/2):floor(DScl+BS/2),:)),linspace(DSXData(1),DSXData(2),DSc),BS);
         [USmean2Bin USxs]   = AverageBins(mean(  USmean2(ceil(UScl-BS/2):floor(UScl+BS/2),:)),linspace(USXData(1),USXData(2),USc),BS);
         [DSmean2Bin DSxs]   = AverageBins(mean(  DSmean2(ceil(DScl-BS/2):floor(DScl+BS/2),:)),linspace(DSXData(1),DSXData(2),DSc),BS);
-        CLmean1=[USmean1Bin DSmean1Bin];
-        CLmean2=[USmean2Bin DSmean2Bin];
+        [USmeanc1c2Bin USxs]= AverageBins(mean(  USmean1(ceil(UScl-BS/2):floor(UScl+BS/2),:).*...
+                                                 USmean2(ceil(UScl-BS/2):floor(UScl+BS/2),:)),linspace(USXData(1),USXData(2),USc),BS);
+        [DSmeanc1c2Bin DSxs]= AverageBins(mean(  DSmean1(ceil(DScl-BS/2):floor(DScl+BS/2),:).*...
+                                                 DSmean2(ceil(DScl-BS/2):floor(DScl+BS/2),:)),linspace(DSXData(1),DSXData(2),DSc),BS);
+        CLmean1   =[USmean1Bin DSmean1Bin];
+        CLmean2   =[USmean2Bin DSmean2Bin];
+        CLmeanC1C2=[USmeanc1c2Bin DSmeanc1c2Bin];
         
      % Bin rms
         [USRMSE1Bin USxs]   = AverageBins(mean(  USRMSE1(ceil(UScl-BS/2):floor(UScl+BS/2),:)),linspace(USXData(1),USXData(2),USc),BS);
@@ -58,10 +63,11 @@ load(['Vars/Eps' sprintf('%.3f', eps) '/VOetc' NAME],'VO','S','USycent','DSycent
         CLrms2=[USRMSE2Bin DSRMSE2Bin];
         
     % Bin C1C2, Cov
-        [USc1c2Bin USxs]   = AverageBins(mean(  USC1C2(ceil(UScl-BS/2):floor(UScl+BS/2),:)),linspace(USXData(1),USXData(2),USc),BS);
-        [DSc1c2Bin DSxs]   = AverageBins(mean(  DSC1C2(ceil(DScl-BS/2):floor(DScl+BS/2),:)),linspace(DSXData(1),DSXData(2),DSc),BS);
-        [USCovBin USxs]   = AverageBins(mean(  USCov(ceil(UScl-BS/2):floor(UScl+BS/2),:)),linspace(USXData(1),USXData(2),USc),BS);
-        [DSCovBin DSxs]   = AverageBins(mean(  DSCov(ceil(DScl-BS/2):floor(DScl+BS/2),:)),linspace(DSXData(1),DSXData(2),DSc),BS);
+        [USc1c2Bin USxs]    = AverageBins(mean(  USC1C2(ceil(UScl-BS/2):floor(UScl+BS/2),:)),linspace(USXData(1),USXData(2),USc),BS);
+        [DSc1c2Bin DSxs]    = AverageBins(mean(  DSC1C2(ceil(DScl-BS/2):floor(DScl+BS/2),:)),linspace(DSXData(1),DSXData(2),DSc),BS);
+        [USCovBin USxs]     = AverageBins(mean(  USCov(ceil(UScl-BS/2):floor(UScl+BS/2),:)),linspace(USXData(1),USXData(2),USc),BS);
+        [DSCovBin DSxs]     = AverageBins(mean(  DSCov(ceil(DScl-BS/2):floor(DScl+BS/2),:)),linspace(DSXData(1),DSXData(2),DSc),BS);
+        
         CLc1c2=[USc1c2Bin DSc1c2Bin];
         CLcov=[USCovBin DSCovBin];
         
@@ -71,6 +77,7 @@ load(['Vars/Eps' sprintf('%.3f', eps) '/VOetc' NAME],'VO','S','USycent','DSycent
         [USCovBin USxs]   = AverageBins(sum( USCov ),linspace(USXData(1),USXData(2),USc),BS);
         [DSCovBin DSxs]   = AverageBins(sum( DSCov ),linspace(DSXData(1),DSXData(2),DSc),BS);
         [USmeanc1c2Bin USxs]   = AverageBins(sum( USmean1.*USmean2 ),linspace(USXData(1),USXData(2),USc),BS);
+        [DSmeanc1c2Bin DSxs]   = AverageBins(sum( DSmean1.*DSmean2 ),linspace(DSXData(1),DSXData(2),DSc),BS);
         [DSmeanc1c2Bin DSxs]   = AverageBins(sum( DSmean1.*DSmean2 ),linspace(DSXData(1),DSXData(2),DSc),BS);
         INTc1c2=[USc1c2Bin DSc1c2Bin];
         INTcov=[USCovBin DSCovBin];
@@ -102,19 +109,19 @@ load(['Vars/Eps' sprintf('%.3f', eps) '/VOetc' NAME],'VO','S','USycent','DSycent
   %      plot(linspace(USXData(1),USXData(2),USc),USmean1(round(UScl),:).*USmean2(round(UScl),:),'k--');
   %      plot(linspace(USXData(1),USXData(2),USc),USCov(round(UScl),:),'k:');hold off;
   %      axis([0 20 -.02 .02])
-    subplot(2,1,2);hold on;
-        plot(CLxdat,INTc1c2,'ko');
-        plot(CLxdat,INTcov,'k^');
-        plot(CLxdat,INTmeanc1c2,'ks');
-        plot([0 30],[0 0],'k-');
-        %%plot(CLxdat,INTmeanc1c2+INTcov-INTc1c2,'ko');
-        axis([0 30 min(INTcov) max([INTmeanc1c2 INTc1c2])]);hold off;
-    subplot(2,1,1);
-        plot(CLxdat,CLmean1,'bo');hold on;
-        plot(CLxdat,CLmean2,'ro');hold off;
+%     subplot(2,1,2);hold on;
+%         plot(CLxdat,INTc1c2,'ko');
+%         plot(CLxdat,INTcov,'k^');
+%         plot(CLxdat,INTmeanc1c2,'ks');
+%         plot([0 30],[0 0],'k-');
+%         %%plot(CLxdat,INTmeanc1c2+INTcov-INTc1c2,'ko');
+%         axis([0 30 min(INTcov) max([INTmeanc1c2 INTc1c2])]);hold off;
+%     subplot(2,1,1);
+%         plot(CLxdat,CLmean1,'bo');hold on;
+%         plot(CLxdat,CLmean2,'ro');hold off;
         
    % subplot(2,1,2)
    %     plot(CLxdat,CLs,'ko');
    %     axis([0 30 -1 1]);hold off;
         
-    save(['Vars/Eps' sprintf('%.3f', eps) '/BinnedCLStats' NAME],'VO','CLxdat','CLmean1','CLmean2','CLrms1','CLrms2','CLs','CLrho','CLc1c2','CLcov', 'INTc1c2', 'INTcov', 'INTc1c2rho', 'INTc1c2s');
+    save(['Vars/Eps' sprintf('%.3f', eps) '/BinnedCLStats' NAME],'VO','CLxdat','CLmean1','CLmean2','CLmeanC1C2','CLrms1','CLrms2','CLs','CLrho','CLc1c2','CLcov', 'INTc1c2', 'INTcov', 'INTc1c2rho', 'INTc1c2s');

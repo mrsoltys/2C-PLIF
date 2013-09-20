@@ -1,4 +1,4 @@
-function [mean1 mean2]=FindMeanE(Direct, Start, Stop,eps)
+function [Rank]=RankImgs(Direct, Start, Stop,eps)
 %--------------------------------------------------------------------------------%
 % FindMeanE 
 % Finds the mean of a series of processed images, filtered with some threhold value
@@ -34,45 +34,35 @@ mkdir(Prefix);
 disp(['Finding mean for ' int2str(Start) '-' int2str(Stop)]);
 
 load([Direct 'ProcImgs/Proc' sprintf('%05d', Start(1))],'C1','C2')   %Proc Mean
-                                                          
-EX1=zeros(size(C1));
-EX2=zeros(size(C2));
-EXsq1=EX1;
-EXsq2=EX2;
-C1C2=zeros(size(C1));
+load([Prefix '/ProcMeansE' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'mean1', 'mean2');
 
+
+C1C2=zeros(size(C1));
+Rank=[];
 ind=1;
 while ind<=length(Start)
-    parfor i=Start(ind):Stop(ind)
-        [C1 C2]=ParLoad([Direct 'ProcImgs/Proc' sprintf('%05d', i)], eps)
+    for i=Start(ind):Stop(ind)
+        [C1 C2]=ParLoad([Direct 'ProcImgs/Proc' sprintf('%05d', i)], eps);
+        Cov=(C1-mean1).*(C2-mean2);
+        C1C2=C1.*C2;
         
-        EX1=EX1+C1;
-        EX2=EX2+C2;
+        Temp(i).ImgNo=i;
+        Temp(i).C1C2tot=sum(C1C2(:));
+        Temp(i).C1C2max=max(C1C2(:));
+        Temp(i).C1C290 =prctile(C1C2(:),90);
         
-        EXsq1=EXsq1+C1.^2;
-        EXsq2=EXsq2+C2.^2;
-        
-        C1C2=C1C2+C1.*C2;
-        
+        Temp(i).CovMean=mean(Cov(:));
+        Temp(i).CovStd =std(Cov(:));
+        Temp(i).MaxCov =max(Cov(:));
+        Temp(i).MinCov =min(Cov(:));
+        Temp(i).Cov90  =prctile(Cov(:),90);
     end
-    
+    Rank=[Rank Temp(Start(ind):Stop(ind))];
     ind=ind+1;
 end
 
 
-EXsq1=EXsq1./(sum(Stop-Start)+length(Start));
-EXsq2=EXsq2./(sum(Stop-Start)+length(Start));
-
-mean1=EX1./(sum(Stop-Start)+length(Start));
-mean2=EX2./(sum(Stop-Start)+length(Start));
-
-RMSE1=sqrt(EXsq1-mean1.^2);
-RMSE2=sqrt(EXsq2-mean2.^2);
-
-C1C2=C1C2./(sum(Stop-Start)+length(Start));
-Cov=C1C2-mean1.*mean2;
-
-save([Prefix '/ProcMeansE' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'mean1', 'mean2', 'RMSE1', 'RMSE2', 'C1C2', 'Cov');   %Proc Mean
+save([Prefix '/ImgRanks' sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(length(Start)))], 'Rank');   %Proc Mean
 %FindRmsCovE(Direct, Start, Stop,eps);
 end
 
