@@ -20,7 +20,7 @@ Width=13.49414;
 % end
 
 %Width=8.5;
-GraphSize=Width.*(1-MG*2-(Xs-1)*PD)/Xs;
+GraphSize=Width.*(1-MG*1.5-(Xs-1)*PD)/Xs;
 Height=GraphSize*ceil(Ys/2)/(1-3*MG-(ceil(Ys/2)-1)*PD);
 %Width=(Xs*GraphSize)/(1-(2+Xs)*MG);
 set(0,'DefaultTextFontSize', 10)
@@ -113,7 +113,7 @@ Yax=linspace(0,1,PDFsize).^Exp;
 %            JPDF(JPDF<Contours(1))=0;
             
             %Plot
-            subaxis(ceil(Ys/2),Xs,X,Y,'Spacing', 0, 'Padding', PD, 'Margin', MG,'MarginRight', MG,'MarginBottom', 2*MG);
+            subaxis(ceil(Ys/2),Xs,X,Y,'Spacing', 0, 'Padding', PD, 'Margin', MG,'MarginRight', MG/2,'MarginBottom', 2*MG);
                 unfreezeColors;
 %                 subaxis(3*6,Xs*6,X*6-4,Y*6-5,5,5,'Spacing', 0, 'Padding', 0,'PaddingRight',MG,'PaddingTop',MG, 'Margin', 2*MG,'MarginRight',MG);
                 display_JPDF(JPDF, Xax);hold on;    
@@ -161,15 +161,15 @@ Yax=linspace(0,1,PDFsize).^Exp;
            %     plot([0 1],[Mean1 Mean1].^Exp,'b');hold off;
                  
                 if X==1;
-                    ylabel('$\Phi_A$');
+                    ylabel('$\Phi_A$','Rotation',0);
                     set(gca,'YTick',linspace(0,1,6).^Exp,...
                         'YTickLabel',linspace(0,1,6));%,...
                         %'XTick',MAX,'XTickLabel',[]);axis([0 Max2 0 1]);
                 elseif (X==3 && strcmp(TitleTxt,'Re1500far'));
-                    text(1.06,.75,['$z=$' num2str(JPDFs(Y,X).Ynorm)],'Units','Normalized','Rotation',-90)
+                    text(1.07,.75,['$z=$' num2str(JPDFs(Y,X).Ynorm)],'Units','Normalized','Rotation',-90)
                     set(gca,'YTick',[]);%,'XTick',[]);
                 elseif X==4;
-                    text(1.06,.75,['$z=$' num2str(JPDFs(Y,X).Ynorm)],'Units','Normalized','Rotation',-90)
+                    text(1.07,.75,['$z=$' num2str(JPDFs(Y,X).Ynorm)],'Units','Normalized','Rotation',-90)
                     set(gca,'YTick',[]);%,'XTick',[]);
                 else
                     set(gca,'YTick',[]);%,'XTick',[]);
@@ -187,4 +187,4 @@ Yax=linspace(0,1,PDFsize).^Exp;
    % c=colorbar ('FontSize',12,'YTick',log(Contours),'YTickLabel',Contours);
 
 
-     print('-dpdf','-r600',['Vars/Eps' sprintf('%.3f', eps) '/' TitleTxt '_PDF_many.pdf'])
+     print('-dpdf','-r800',['Vars/Eps' sprintf('%.3f', eps) '/' TitleTxt '_PDF_many.pdf'])

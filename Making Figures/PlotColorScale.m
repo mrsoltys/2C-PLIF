@@ -12,7 +12,8 @@ Xs=(0:.005:1).^(1/Exp);
 %subaxis(1,1,1,'Spacing', 0, 'Margin', .1)
     imshow(ColorChangeWhite(Red, Blue, Exp),'XData',Xs,'YData',fliplr(Xs));
     xLabH=xlabel('$\Phi_B$');
-    yLabH=ylabel('$\Phi_A$');
+    yLabH=ylabel('$\Phi_A$','Rotation',0);
+    set(yLabH,'Position',[-.4, .35, 1])
     axis square;
     set(gca,'YDir','normal',...
             'XAxisLocation','bottom',... 

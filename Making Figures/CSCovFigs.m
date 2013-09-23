@@ -56,7 +56,7 @@ load(['Vars/PreRunVars'],'Scale');
     for i=1:length(Xpts)
        %subaxis(rows,cols,cellx,celly,spanx,spany[,settings]) 
        if i==1
-            subaxis(1,18,1,1,6,1,'Margin',.01,'MarginLeft',.06,'MarginBottom',.07,'MarginTop',.055,'Padding',0.01,'Spacing',0)
+            subaxis(1,18,1,1,6,1,'Margin',.01,'MarginLeft',.06,'MarginBottom',.07,'MarginTop',.06,'Padding',0.01,'Spacing',0)
             axis([-.013 .022 -3 3]);
             set(gca,'XTick',[-.01, 0, .01],'XTickLabel',{'-0.01';'0';'0.01'});
             title('$x=2.5$')
@@ -166,7 +166,7 @@ load(['Vars/PreRunVars'],'Scale');
             
         end
         if i==1
-           ylabel('$z$');
+           ylabel('$z$','Rotation',0);
            Leg=legend([c1c2Plot, MuPlot, CovPlot],'$\left<\Phi_A \Phi_B\right>$','$\left<\Phi_A\right>\left<\Phi_B\right>$','$\left<\phi_A^\prime \phi_B^\prime\right>$','Location','NorthEast');
            set(Leg,'Position',[0.175, 0.66, 0.2168, 0.2626])
            set(Leg,'Box','off');
