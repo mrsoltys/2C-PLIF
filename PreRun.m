@@ -207,8 +207,8 @@ disp('Finding Focus Imgage')
 disp('Loading Focusing Imgs');
     FocusImg1=im2double(imread([Direct 'RawImgs/' C1Dir(FocusInd).name]));
     FocusImg2=im2double(imread([Direct 'RawImgs/' C2Dir(FocusInd).name]));
-    imwrite((FocusImg1-min(min(FocusImg1)))/mean(max(FocusImg1)), ['calib1.jpg']);
-    imwrite((FocusImg2-min(min(FocusImg2)))/mean(max(FocusImg2)), ['calib2.jpg']);
+    imwrite((FocusImg1-min(FocusImg1(:)))/(mean(max(FocusImg1))-min(FocusImg1(:))), ['calib1.jpg']);
+    imwrite((FocusImg2-min(FocusImg2(:)))/(mean(max(FocusImg2))-min(FocusImg2(:))), ['calib2.jpg']);
     %We need to make sure x_1 and x_2 are accessiable
     [TFORM1 TFORM2 Cs Scale]=ImgNorm()
 %         calib_gui;
@@ -224,20 +224,24 @@ disp('Checking Cameras')
 
  FocusImg1=im2double(imread([Direct 'RawImgs/' C1Dir(FocusInd).name]));
  FocusImg2=im2double(imread([Direct 'RawImgs/' C2Dir(FocusInd).name]));
-Img(:,:,1)=imtransform( FocusImg1/max(max(FocusImg1)) ,...
+Img1=imtransform( FocusImg1/max(max(FocusImg1)) ,...
                      TFORM1,...
                      'FillValues', 0,...
                      'XData', [Cs(1)+AddCrop(1) Cs(2)-AddCrop(2)],...
                      'YData', [Cs(3)+AddCrop(3) Cs(4)-AddCrop(4)]); 
                      %'XData', [Cs(1) Cs(2)],...
                      %'YData', [Cs(3) Cs(4)]) ;
-Img(:,:,2)=imtransform( FocusImg2/max(max(FocusImg2)) ,...
+Img2=imtransform( FocusImg2/max(max(FocusImg2)) ,...
                      TFORM2,...
                      'FillValues', 0,...
                      'XData', [Cs(1)+AddCrop(1) Cs(2)-AddCrop(2)],...
                      'YData', [Cs(3)+AddCrop(3) Cs(4)-AddCrop(4)]); 
                      %'XData', [Cs(1) Cs(2)],...
                      %'YData', [Cs(3) Cs(4)]) ;                
+%Perform Rescaling and Thresholding                     
+Img1=(Img1-mean(min(Img1)))/(mean(max(Img1))-mean(min(Img1)));
+Img2=(Img2-mean(min(Img2)))/(mean(max(Img2))-mean(min(Img2)));
+subplot(1,2,1);imagesc(imfuse(Img1,Img2));axis image;    
 %     Cs=FindCorners(TFORM);
 %     Cs=Cs+AddCrop';
 %    
@@ -247,8 +251,11 @@ Img(:,:,2)=imtransform( FocusImg2/max(max(FocusImg2)) ,...
 %                     'FillValues', 0,...
 %                     'XData', [Cs(1) Cs(2)],...
 %                     'YData', [Cs(3) Cs(4)]) ;
-     Img(:,:,3)=zeros(size(Img(:,:,1)));
-    imshow(Img(:,:,1)-Img(:,:,2));colorbar;
+     %Img(:,:,3)=zeros(size(Img(:,:,1)));
+     Img1=im2bw(Img1, graythresh(Img1));
+     Img2=im2bw(Img2, graythresh(Img2));
+    subplot(1,2,2);
+    imshow(abs(Img1-Img2));axis image;
     title('Do squares line up? If not, somethings wrong!');  
     
 %% Translate Average Sets
