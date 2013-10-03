@@ -1,7 +1,12 @@
-function MikesPogressBar(Count,Length,Handle )
+function [Count]=MikesPogressBar(Count,Length,Handle )
 %function MikesPogressBar(Count,Length,Handle )
-%UNTITLED4 Summary of this function goes here
-%   Detailed explanation goes here
+% Must call tic; before calling MikesProgressBar:
+% e.g.:
+% h = waitbar(0,'Please wait...');tic;
+% for
+%    tic;MikesProgressBar(i,Length,h)
+% end
+% delete(h);
 
 t=toc;
 %Count=t/toc(iStart);

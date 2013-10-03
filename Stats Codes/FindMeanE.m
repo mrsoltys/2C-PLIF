@@ -41,7 +41,10 @@ EXsq1=EX1;
 EXsq2=EX2;
 C1C2=zeros(size(C1));
 
+%L=sum(Stop-Start)+length(Stop);
+%h = waitbar(0,'Please wait...');tic;
 ind=1;
+%count=0;
 while ind<=length(Start)
     parfor i=Start(ind):Stop(ind)
         [C1 C2]=ParLoad([Direct 'ProcImgs/Proc' sprintf('%05d', i)], eps)
@@ -54,11 +57,13 @@ while ind<=length(Start)
         
         C1C2=C1C2+C1.*C2;
         
+        %count=MikesProgressBar(count+1,L,h);
+       
     end
     
     ind=ind+1;
 end
-
+%delete(h);
 
 EXsq1=EXsq1./(sum(Stop-Start)+length(Start));
 EXsq2=EXsq2./(sum(Stop-Start)+length(Start));

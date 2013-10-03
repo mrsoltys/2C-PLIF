@@ -14,8 +14,8 @@ elseif nargin == 1
           Sxths(5)=Sxths(6);
           Sxths(4)=64-sum(Sxths);
           
-     B(1,:)= [zeros(1,Sxths(1)+Sxths(2)) linspace(0,1,Sxths(3)) ones(1,Sxths(4)+Sxths(5)) linspace(1,.5,Sxths(6))]
-     B(2,:)= [zeros(1,Sxths(1)) linspace(0,1,Sxths(2)) ones(1,Sxths(3)+Sxths(4)) linspace(1,0,Sxths(5)) zeros(1,Sxths(6))]
+     B(1,:)= [zeros(1,Sxths(1)+Sxths(2)) linspace(0,1,Sxths(3)) ones(1,Sxths(4)+Sxths(5)) linspace(1,.5,Sxths(6))];
+     B(2,:)= [zeros(1,Sxths(1)) linspace(0,1,Sxths(2)) ones(1,Sxths(3)+Sxths(4)) linspace(1,0,Sxths(5)) zeros(1,Sxths(6))];
      B(3,:)= [linspace(.5,1,Sxths(1)) ones(1,Sxths(2)+Sxths(3)) linspace(1,0,Sxths(4)) zeros(1,Sxths(5)+Sxths(6))];
     
 else
@@ -28,8 +28,8 @@ else
           Sxths(5)=Sxths(6);
           Sxths(4)=64-sum(Sxths);
           
-     B(1,:)= [zeros(1,Sxths(1)+Sxths(2)) linspace(0,1,Sxths(3)) ones(1,Sxths(4)+Sxths(5)) linspace(1,.5,Sxths(6))]
-     B(2,:)= [zeros(1,Sxths(1)) linspace(0,1,Sxths(2)) ones(1,Sxths(3)+Sxths(4)) linspace(1,0,Sxths(5)) zeros(1,Sxths(6))]
+     B(1,:)= [zeros(1,Sxths(1)+Sxths(2)) linspace(0,1,Sxths(3)) ones(1,Sxths(4)+Sxths(5)) linspace(1,.5,Sxths(6))];
+     B(2,:)= [zeros(1,Sxths(1)) linspace(0,1,Sxths(2)) ones(1,Sxths(3)+Sxths(4)) linspace(1,0,Sxths(5)) zeros(1,Sxths(6))];
      B(3,:)= [linspace(.5,1,Sxths(1)) ones(1,Sxths(2)+Sxths(3)) linspace(1,0,Sxths(4)) zeros(1,Sxths(5)+Sxths(6))];
      
 end

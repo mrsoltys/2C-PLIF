@@ -118,8 +118,11 @@ subaxis(2,2,4);
     Rho(isnan(Rho))=0;
     imagesc(Xs,Ys,Rho);
         set(gca,'YDir', 'normal');axis([Xs(length(Xs)) Xs(1) -8 8]);
-
-        colormap(HotCold(-1,1));caxis([-1 1]);colorbar('location','South')
+    clear B;
+    B(1,:)= [0:1/31:1 ones(1,32)];
+        B(2,:)= [0:1/31:1 1:-1/31:0];
+        B(3,:)= [ones(1,32) 1:-1/31:0];
+        colormap(B');caxis([-1 1]);colorbar('location','South')
     hold on;axis image;
         plot(Xs(X1)+10.*mean(Rho(:,(X1-Sixth):(X1+Sixth) ),2),Ys,'k-.','LineWidth',1.5);
 

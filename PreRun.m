@@ -162,6 +162,8 @@ disp('Average Each Set');
     Size=length(C1Dir);
     Set=0;
     i=0;
+    %initialize progress bar
+    h = waitbar(0,'Please wait...');tic;
     while i~=(Size)
         i=i+1;
         if i==1 || C1Dir(i-1).SeriesNo~=C1Dir(i).SeriesNo %is it a new series?
@@ -175,9 +177,8 @@ disp('Average Each Set');
 
                     I1=I1+double( imread([Direct 'RawImgs/' C1Dir(i).name]) );
                     I2=I2+double( imread([Direct 'RawImgs/' C2Dir(i).name]) );
-                 %Display Progress
-                    stopBar= progressbar((i-1)/(Size),5);
-                    if (stopBar) break; end   
+                 %Display Progress                    
+                    MikesPogressBar(i,Size,h);
                 end
                  
              I1=I1 ./ (i-SetStart(Set)+1);
@@ -187,8 +188,8 @@ disp('Average Each Set');
              disp([int2str(SetStart(Set)) ' : ' C1Dir(i).SerName]);
         end
     end
+    delete(h);
     
-
 %% Find focus image
 disp('Finding Focus Imgage')
     FocusInd=[];
