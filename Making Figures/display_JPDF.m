@@ -1,4 +1,4 @@
-function display_JPDF(JPDF, Centers)
+function display_JPDF(JPDF, Centers, Expon)
 %-------------------------------------------------------------------------%
 % display_JPDF(JPDF)
 % Required Inputs:
@@ -53,10 +53,10 @@ Yax=Xax;
     %axis([0 1 0 1]);
     axis square;
     set(gca,'YDir','normal');%colorbar('FontSize',10,'Location','East')
-    %set(gca,    'XTick',[],'YTick',[]);%PDFsize*linspace(0,1,11).^Expon,...
-                            %'XTickLabel',linspace(0,1,11),...
-                            %'YTick',PDFsize*linspace(0,1,11).^Expon,...
-                            %'YTickLabel',linspace(0,1,11));
+    set(gca,    'XTick',linspace(0,1,11).^Expon,...
+                'XTickLabel',linspace(0,1,11),...
+                'YTick',linspace(0,1,11).^Expon,...
+                'YTickLabel',linspace(0,1,11));
 	%Colorbar
    % hc=colorbar('FontSize',10,'Location','East','YTick',log(Contours),'YTickLabel',ContLabel);
    % cPos=get(hc,'Position');

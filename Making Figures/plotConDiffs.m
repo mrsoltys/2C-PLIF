@@ -20,7 +20,7 @@ Width=13.49414;
 % end
 
 %Width=8.5;
-GraphSize=Width.*(1-MG*1.5-(Xs-1)*PD)/Xs;
+GraphSize=Width.*(1-MG*2.5-(Xs-1)*PD)/Xs;
 Height=GraphSize*ceil(Ys/2)/(1-3*MG-(ceil(Ys/2)-1)*PD);
 %Width=(Xs*GraphSize)/(1-(2+Xs)*MG);
 set(0,'DefaultTextFontSize', 10)
@@ -124,7 +124,7 @@ AxMax=0.6;
 %            JPDF(JPDF<Contours(1))=0;
             
             %Plot
-            subaxis(ceil(Ys/2),Xs,X,Y,'Spacing', 0, 'Padding', PD, 'Margin', MG,'MarginRight', MG/2,'MarginBottom', 2*MG);
+            subaxis(ceil(Ys/2),Xs,X,Y,'Spacing', 0, 'Padding', PD, 'PaddingLeft',2*PD,'PaddingRight',0,'Margin', MG,'MarginLeft',2*MG,'MarginRight', MG/2,'MarginBottom', 2*MG);
                 unfreezeColors;
                     MaxC=max(max(sqrt(ConD2.^2+ConD1.^2)));
                     imagesc(Xax,Yax,sqrt(ConD2.^2+ConD1.^2) );axis image;
@@ -158,7 +158,7 @@ AxMax=0.6;
                 %['$\alpha=' sprintf('%.1f', Rho) '$']}) 
             
             if Y==1;
-                title(['$x^*=$' num2str(JPDFs(Y,X).Xnorm)]);
+                title(['$x=$' num2str(JPDFs(Y,X).Xnorm)],'FontSize',11);
             end
             
             Max1=ceil(max(sum(JPDF))*10)/10;
@@ -189,11 +189,16 @@ AxMax=0.6;
                     set(gca,'YTick',linspace(0,1,6).^Exp,...
                         'YTickLabel',linspace(0,1,6));%,...
                         %'XTick',MAX,'XTickLabel',[]);axis([0 Max2 0 1]);
+                        text(-.5,.5,['$z=$' num2str(JPDFs(Y,X).Ynorm)],'Units','Normalized',...
+                                                'HorizontalAlignment','center',...
+                                                'VerticalAlignment','middle',...
+                                                'FontSize',11,...
+                                                'Rotation',90)
                 elseif (X==3 && strcmp(TitleTxt,'Re1500far'));
-                    text(1.07,.75,['$z=$' num2str(JPDFs(Y,X).Ynorm)],'Units','Normalized','Rotation',-90)
+                    %text(1.07,.75,['$z=$' num2str(JPDFs(Y,X).Ynorm)],'Units','Normalized','Rotation',-90)
                     set(gca,'YTick',[]);%,'XTick',[]);
                 elseif X==4;
-                    text(1.07,.75,['$z=$' num2str(JPDFs(Y,X).Ynorm)],'Units','Normalized','Rotation',-90)
+                    %text(1.07,.75,['$z=$' num2str(JPDFs(Y,X).Ynorm)],'Units','Normalized','Rotation',-90)
                     set(gca,'YTick',[]);%,'XTick',[]);
                 else
                     set(gca,'YTick',[]);%,'XTick',[]);

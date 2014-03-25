@@ -25,7 +25,9 @@ disp(['Finding Lambda Using Imgs ' int2str(Start) '-' int2str(Stop)]);
         D1=I1; D2=I2;
 
 %% Find Lambda for Each Individual Image
-
+L=sum(Stop-Start)+length(Stop);
+count=0;
+h = waitbar(0,'Please wait...');tic;
 for i=Start:Stop
     %Initialize empty Lambda Vectors    
         L1=[]; L2=[]; C2m=[]; C1m=[];
@@ -242,10 +244,12 @@ for i=Start:Stop
         
         %Display Progress
             %stopBar= 
-            progressbar((i-Start+1)/(Stop-Start+1),5);
+            %count=count+1;
+            %MikesProgressBar(count,L,h);
             %if (stopBar) break; end
 
 end
+delete(h);
 Lambda1=trimmean(Lambdas1,20)
 Lambda2=trimmean(Lambdas2,20)
 

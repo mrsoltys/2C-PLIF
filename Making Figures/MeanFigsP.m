@@ -27,6 +27,7 @@ load(['Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' MeanName]);
         [sigma1(i),Mu1(i),A1(i)]=mygaussfit(Ys ,mean1(:,i));
         [sigma2(i),Mu2(i),A2(i)]=mygaussfit(Ys ,mean2(:,i));
     end
+    
         %[sigma1,mu1,S1]=mygaussfit(Ys,mean(mean1,2));
         %[sigma2,mu2,S2]=mygaussfit(Ys,mean(mean2,2));
     if nargin == 6
@@ -39,7 +40,9 @@ load(['Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' MeanName]);
     %mean1=mean1/A1;
     %mean2=mean2/A2;
     
-    Ys=Ys-mean(Mu1+Mu2)/2;
+    Mu1(isnan(Mu1))=0;
+    Mu2(isnan(Mu2))=0;
+    Ys=Ys-trimmean((Mu1+Mu2)/2,10);
     EXP=.5
     Img=ColorChangeWhite(mean1.*S1,mean2.*S2,EXP);
     imshow(Img,'XData',Xs,'YData',Ys);
@@ -113,7 +116,7 @@ subaxis(2,2,3)
     CovP=mean(Cov*S1*S2,2);
     
 subaxis(2,2,4);
-    Rho=Cov./(RMSE1.*RMSE2);
+    Rho=real(Cov./(RMSE1.*RMSE2));
     Rho(isinf(Rho))=0;
     Rho(isnan(Rho))=0;
     imagesc(Xs,Ys,Rho);

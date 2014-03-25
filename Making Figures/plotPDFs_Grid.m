@@ -1,13 +1,8 @@
 
-function plotPDFs(USstart, USstop, DSstart,DSstop, eps, Exp, TitleTxt)
-load(['Vars/Eps' sprintf('%.3f', eps) '/PDF2d'   sprintf('%05d', USstart) '-' sprintf('%05d', DSstop)], 'JPDFs');   %Proc Mean
+function plotPDFs_Grid(Start, Stop, eps, Exp, TitleTxt)
+load(['Vars/Eps' sprintf('%.3f', eps) '/PDF2d'   sprintf('%05d', Start(1)) '-' sprintf('%05d', Stop(end))], 'JPDFs');   %Proc Mean
 %load(['Vars/Eps' sprintf('%.3f', eps) '/ConDiff' sprintf('%05d', USstart) '-' sprintf('%05d', DSstop)], 'ConDiffs');  
   
-
-if ~strcmp(TitleTxt,'Re1500close')
-    JPDFs=JPDFs(2:4,:);
-end
-
 PDFsize=length(JPDFs(1).JPDF);
 colormap(flipud(hot));%colormap(flipud(gray.^.75));
 [Ys,Xs]=size(JPDFs); 
@@ -20,7 +15,7 @@ Width=13.49414;
 % end
 
 %Width=8.5;
-GraphSize=Width.*(1-MG*2.5-(Xs-1)*PD)/Xs;
+GraphSize=Width.*(1-MG*1.5-(Xs-1)*PD)/Xs;
 Height=GraphSize*ceil(Ys/2)/(1-3*MG-(ceil(Ys/2)-1)*PD);
 %Width=(Xs*GraphSize)/(1-(2+Xs)*MG);
 set(0,'DefaultTextFontSize', 10)
@@ -86,6 +81,9 @@ Yax=linspace(0,1,PDFsize).^Exp;
                 Alpha=(JPDFs(Y,X).Cov/(JPDFs(Y,X).Mean1*JPDFs(Y,X).Mean2));
             end
             
+            JPDF(1:2,1:2)=[0,0;0,0];
+            JPDF=JPDF/sum(JPDF(:));
+            
 %             %Want Contours at 99, 95, 90 85 80 70%
 %             Precents=[.80 .60 .40 .20];
 % 
@@ -113,10 +111,10 @@ Yax=linspace(0,1,PDFsize).^Exp;
 %            JPDF(JPDF<Contours(1))=0;
             
             %Plot
-            subaxis(ceil(Ys/2),Xs,X,Y,'Spacing', 0, 'Padding', PD, 'PaddingLeft',2*PD,'PaddingRight',0,'Margin', MG,'MarginLeft',2*MG,'MarginRight', MG/2,'MarginBottom', 2*MG);
+            subaxis(ceil(Ys/2),Xs,X,Y,'Spacing', 0, 'Padding', PD, 'Margin', MG,'MarginRight', MG/2,'MarginBottom', 2*MG);
                 unfreezeColors;
 %                 subaxis(3*6,Xs*6,X*6-4,Y*6-5,5,5,'Spacing', 0, 'Padding', 0,'PaddingRight',MG,'PaddingTop',MG, 'Margin', 2*MG,'MarginRight',MG);
-                display_JPDF(JPDF, Xax,Exp);hold on;    
+                display_JPDF(JPDF, Xax, Exp);hold on;    
             %contourf(Xax,Yax, log(JPDF),log(Contours));hold on;
                     plot([Mean2 Mean2].^Exp,[0 1],'b');
                     plot([0 1],[Mean1 Mean1].^Exp,'b');
@@ -134,7 +132,7 @@ Yax=linspace(0,1,PDFsize).^Exp;
                 %['$\alpha=' sprintf('%.1f', Rho) '$']}) 
             
             if Y==1;
-                title(['$x=$' num2str(JPDFs(Y,X).Xnorm)],'FontSize',11);
+                title(['$x=$' num2str(JPDFs(Y,X).Xnorm)]);
             end
             
             Max1=ceil(max(sum(JPDF))*10)/10;
@@ -165,24 +163,11 @@ Yax=linspace(0,1,PDFsize).^Exp;
                     set(gca,'YTick',linspace(0,1,6).^Exp,...
                         'YTickLabel',linspace(0,1,6));%,...
                         %'XTick',MAX,'XTickLabel',[]);axis([0 Max2 0 1]);
-                        if ~strcmp(TitleTxt,'Re1500far')
-                            text(-.5,.5,['$z=$' num2str(JPDFs(Y,X).Ynorm)],'Units','Normalized',...
-                                                                    'HorizontalAlignment','center',...
-                                                                    'VerticalAlignment','middle',...
-                                                                    'FontSize',11,...
-                                                                    'Rotation',90)
-                        else
-                            text(-.39,.5,['$z=$' num2str(JPDFs(Y,X).Ynorm)],'Units','Normalized',...
-                                                                    'HorizontalAlignment','center',...
-                                                                    'VerticalAlignment','middle',...
-                                                                    'FontSize',11,...
-                                                                    'Rotation',90)
-                        end
                 elseif (X==3 && strcmp(TitleTxt,'Re1500far'));
-                %    text(1.07,.75,['$z=$' num2str(JPDFs(Y,X).Ynorm)],'Units','Normalized','Rotation',90)
+                    text(1.07,.75,['$z=$' num2str(JPDFs(Y,X).Ynorm)],'Units','Normalized','Rotation',-90)
                     set(gca,'YTick',[]);%,'XTick',[]);
                 elseif X==4;
-               %     text(1.07,.75,['$z=$' num2str(JPDFs(Y,X).Ynorm)],'Units','Normalized','Rotation',-90)
+                    text(1.07,.75,['$z=$' num2str(JPDFs(Y,X).Ynorm)],'Units','Normalized','Rotation',-90)
                     set(gca,'YTick',[]);%,'XTick',[]);
                 else
                     set(gca,'YTick',[]);%,'XTick',[]);

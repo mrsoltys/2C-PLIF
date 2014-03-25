@@ -1,187 +1,93 @@
 %% STEP 1: Merge Mean Figs
 % Load US stats
-function JPDF2(Directory,USstart, USstop, DSstart,DSstop, eps, Expon, TitleTxt) 
+function JPDF_Grid(Directory,Start, Stop, S, eps, Expon, TitleTxt) 
 %   
 set(0,'defaulttextinterpreter','latex')
 NAME=TitleTxt;
-load(['Vars/Eps' sprintf('%.3f', eps) '/VOetc' NAME],'VO','S','USycent','DSycent','Yshift','USXData','USYData','DSXData','DSYData','CLshift','Ang1','Ang2');
+%load(['Vars/Eps' sprintf('%.3f', eps) '/VOetc' NAME],'VO','S','USycent','DSycent','Yshift','USXData','USYData','DSXData','DSYData','CLshift','Ang1','Ang2');
+load(['Vars/MeanPlots'],'Xs','Ys','S1','S2');
 load('Vars/PreRunVars','Scale');
 % Load US stuff
     mean2=[];
 
-    USMeanName=[ sprintf('%05d', USstart) '-'  sprintf('%05d', USstop)];
-        load(['Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' USMeanName]);
-            USmean1=mean1;USmean2=mean2;
+    MeanName=[ sprintf('%05d', Start(1)) '-'  sprintf('%05d', Stop(end))];
+        load(['Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' MeanName]);
+            mean1=fliplr(mean1');mean2=fliplr(mean2');
             [USr USc]=size(mean1);
        % load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' USMeanName]);
-            USC1C2=C1C2;USCov=Cov;
+            C1C2=fliplr(C1C2');Cov=fliplr(Cov');
        % load(['Vars/Eps' sprintf('%.3f', eps) '/RMSEe' USMeanName]);
-            USRMSE1=RMSE1;USRMSE2=RMSE2;
+            RMSE1=fliplr(RMSE1');RMSE2=fliplr(RMSE2');
+            XData=[Xs(1), Xs(end)];
+            YData=[Ys(1), Ys(end)];
             
-% Load DS stats;
-    DSMeanName=[ sprintf('%05d', DSstart) '-'  sprintf('%05d', DSstop)];
-        load(['Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' DSMeanName]);
-            DSmean1=mean1;DSmean2=mean2;
-            [DSr DSc]=size(mean1);
-       % load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' DSMeanName]);
-            DSC1C2=C1C2;DSCov=Cov;
-       % load(['Vars/Eps' sprintf('%.3f', eps) '/RMSEe' DSMeanName]);
-            DSRMSE1=RMSE1;DSRMSE2=RMSE2;
-% Rescale by Xd /S^2
-% d=0.39;
-% USXData=USXData*d/(S/Scale)
-% DSXData=DSXData*d/(S/Scale)
-% USYData=USYData*d/(S/Scale)
-% DSYData=DSYData*d/(S/Scale)
-
 % Plot Means and <C1C2> with boxes at PDF location
-    Figure1=figure(1);
+    Figure1=figure(1);clf;
 
-    clf;
-
-    subaxis(2,1,1,'Spacing', 0.02, 'Padding', 0.000, 'Margin', .02);
+    subaxis(1,2,1,'Spacing', 0.02, 'Padding', 0.000, 'Margin', .02);
         hold on;
-        imshow(ColorChangeWhite(DSmean1,DSmean2,.5),'XData',DSXData,'YData',DSYData);
-        imshow(ColorChangeWhite(USmean1,USmean2,.5),'XData',USXData,'YData',USYData);
+        imshow(ColorChangeWhite(mean1*10,mean2*10,1),'XData',XData,'YData',YData);
         set(gca,'YDir','normal');
-        %axis([Xshift-DSc USc 1 DSr]);
-        XMAX=floor(max(abs(DSXData*10)))/10;
-        YMAX=floor(min(abs(USYData*10)))/10;
-        axis image;axis([0 XMAX -YMAX YMAX]);
+        axis image;axis([Xs(end), Xs(1), Ys(end), Ys(1)]);
         title('$<C_1 >$ and $<C_2 >$')
-        xlabel('$X/S$');
-        ylabel('$Y/S$');hold off;
-    subaxis(2,1,2,'Spacing', 0.02, 'Padding', 0.000, 'Margin', .02);
+        xlabel('$x$ [cm]');
+        ylabel('$y$ [cm]');hold off;
+    subaxis(1,2,2,'Spacing', 0.02, 'Padding', 0.000, 'Margin', .02);
+        unfreezeColors;
         hold on;
-        imagesc(DSC1C2,'XData',DSXData,'YData',DSYData);
-        imagesc(USC1C2,'XData',USXData,'YData',USYData);
-        %axis([Xshift-DSc USc 1 DSr]);
-        axis image;set(gca,'YDir','normal');axis([0 XMAX -YMAX YMAX]);
-        colormap(flipud(gray));caxis([0 .01]);freezeColors;cbfreeze(colorbar('location','South'));
+        imagesc(C1C2,'XData',XData,'YData',YData);
+        set(gca,'YDir','normal');
+        axis image;axis([Xs(end), Xs(1), Ys(end), Ys(1)]);
+        colormap(flipud(gray));caxis([0 .001]);freezeColors;cbfreeze(colorbar('location','South'));
         title('$<C_1 C_2>$')
         xlabel('$X/S$');
         ylabel('$Y/S$');hold off;
         
-        %(USmean1.*USmean2),'XData',USXData,'YData',USYData);
-        
-        
-
 %%
 %Next we need to define our box locations:
-    Box=[14 14];        % Box size (Real)
-    BoxN=Box/S;         % Box Size (Norm)
+    Box=[14 700];        % Box size [rows,cols](Pixels)
+    BoxN=Box/Scale;         % Box Size (Cm)
     
-    % Create vectors relating Normailzed coordnates to pixel indicies
-        XDatUS=linspace(USXData(1), USXData(2), USc); 
-        XDatDS=linspace(DSXData(1), DSXData(2), DSc);
-        YDatUS=linspace(USYData(1), USYData(2), USr); 
-        YDatDS=linspace(DSYData(1), DSYData(2), DSr);
-
     %Note, Y points will fall at -1, -.5, 0, .5, 1
-        UShgh=find(YDatUS < 1.0,1,'first');
-        UStop=find(YDatUS < 0.5,1,'first');
-        USmid=find(YDatUS < 0.0,1,'first');
-        USbot=find(YDatUS <-0.5,1,'first');
-        USlow=find(YDatUS <-1.0,1,'first');
-    
-        DShgh=find(YDatDS < 1.0,1,'first');
-        DStop=find(YDatDS < 0.5,1,'first');
-        DSmid=find(YDatDS < 0.0,1,'first');
-        DSbot=find(YDatDS <-0.5,1,'first');
-        DSlow=find(YDatDS <-1.0,1,'first');
-    
+        hgh=find(Ys < 2.0*S,1,'first');
+        top=find(Ys < 0.5*S,1,'first');
+        mid=find(Ys < 0.0*S,1,'first');
+        bot=find(Ys <-0.5*S,1,'first');
+        low=find(Ys <-2.0*S,1,'first');
   
     %X pts, for new coordnate system in plots, will have to convert for DS image   
-   % Xpts=[4 12 20 28]*Scale/S
+        Xpts=[round(length(Xs)/2)];
    
-   if S/Scale<2
-       Xpts=[2.5 5 10 20];
-       %Xpts=[1.4 2.8 5.6 11.2];
-       %Xpts=[7 14 21 28]/(S/Scale);
-   else
-       Xpts=[2.5 5 10];
-       %Xpts=[7 14 21 28]/(S/Scale);
-   end
    % Xpts=0:3:60 % Note: The index of XData closest to the points is the easiest conversion, Need some way oto distinguish between upstream and downstreamfo
   % Initialize PDF point matricies
-        USptsL=find(Xpts>((USXData(1)+DSXData(2))/2),1,'first')-1;
-        DSptsL=find(Xpts>DSXData(1),1,'first')-1;
-        if(isempty(DSptsL))
-            DSptsL=length(Xpts);
-        end
-        Xpts=Xpts(1:DSptsL);
-        
+
         %This would work better if i completely reformated it to have a
         %"struct" format based on rows and column, giving real pixel data
         %as well as normalized, statstics, and JPDF....
         
         PDFs=struct([]);
-        PDFptsUS=zeros(5,USptsL,2);
-        PDFptsDS=zeros(5,length(Xpts)-USptsL,2);
+        PDFpts=zeros(5,length(Xpts),2);
 
-    for i=1:length(Xpts)
-        if i<=USptsL
-            % Find the real pixel of the X point
-                if USXData(2) > Xpts(i) % Need Check to see if the VO is on the screen.
-                    USXpts(i)=floor(USc-Box(1)/2);
-                else
-                    USXpts(i)=find(XDatUS < Xpts(i),1,'first');
-                end
-            %Find the gaussian
-%                 [sigma1,Mu1,A1]=mygaussfit(1:USr,mean( USmean1(:,(round(USXpts(i)-Box(1)/2)) : (round(USXpts(i)+Box(1)/2))) ,2));
-%                 [sigma2,Mu2,A2]=mygaussfit(1:USr,mean( USmean2(:,(round(USXpts(i)-Box(1)/2)) : (round(USXpts(i)+Box(1)/2))) ,2));
-%                 Sig=(sigma1+sigma2)/2 ;
-%                 Hgh=min(Mu1,Mu2)-Sig;
-%                 Low=max(Mu1,Mu2)+Sig;
-            Hgh=UShgh;
-            Low=USlow;
-            
-            %Note: Since the images arn't being rotated, we need to adjust
-            %the pixel for the rotation:
-            
+    for i=1:length(Xpts)        
             %Note Loc tells which Img we're in (1 for US, etc)
-                [r, c]=PxlRotate(Hgh,USXpts(i),size(USmean1),-Ang1);
-                PDFs(1,i).Loc=1; PDFs(1,i).Xpix=c; PDFs(1,i).Ypix=r; PDFs(1,i).Xnorm=Xpts(i); %PDFs(1,i).Ynorm=YDatUS(round(PDFs(1,i).Ypix));
-                [r, c]=PxlRotate(UStop,USXpts(i),size(USmean1),-Ang1);                           PDFs(1,i).Ynorm=1;
-                PDFs(2,i).Loc=1; PDFs(2,i).Xpix=c; PDFs(2,i).Ypix=r; PDFs(2,i).Xnorm=Xpts(i); %PDFs(2,i).Ynorm=YDatUS(round(PDFs(2,i).Ypix));
-                [r, c]=PxlRotate(USmid,USXpts(i),size(USmean1),-Ang1);                           PDFs(2,i).Ynorm=.5;
-                PDFs(3,i).Loc=1; PDFs(3,i).Xpix=c; PDFs(3,i).Ypix=r; PDFs(3,i).Xnorm=Xpts(i); %PDFs(3,i).Ynorm=YDatUS(round(PDFs(3,i).Ypix));
-                [r, c]=PxlRotate(USbot,USXpts(i),size(USmean1),-Ang1);                           PDFs(3,i).Ynorm=0;
-                PDFs(4,i).Loc=1; PDFs(4,i).Xpix=c; PDFs(4,i).Ypix=r; PDFs(4,i).Xnorm=Xpts(i); %PDFs(4,i).Ynorm=YDatUS(round(PDFs(4,i).Ypix));
-                [r, c]=PxlRotate(Low,USXpts(i),size(USmean1),-Ang1);                             PDFs(4,i).Ynorm=-.5;
-                PDFs(5,i).Loc=1; PDFs(5,i).Xpix=c; PDFs(5,i).Ypix=r; PDFs(5,i).Xnorm=Xpts(i); %PDFs(5,i).Ynorm=YDatUS(round(PDFs(5,i).Ypix));              
-                                                                                                PDFs(5,i).Ynorm=-1;
-        else
-            % Find the real pixel of the X point
-                DSXpts(i)=find(XDatDS < Xpts(i),1,'first');
-            %Find the gaussian                
-%                 [sigma1,Mu1,A1]=mygaussfit(1:DSr,mean( DSmean1(:,round((DSXpts(i)-Box(1)/2)) : round((DSXpts(i)+Box(1)/2))) ,2));
-%                 [sigma2,Mu2,A2]=mygaussfit(1:DSr,mean( DSmean2(:,round((DSXpts(i)-Box(1)/2)) : round((DSXpts(i)+Box(1)/2))) ,2));
-%                 Sig=(sigma1+sigma2)/2 ;
-%                 Hgh=min(Mu1,Mu2)-Sig;
-%                 Low=max(Mu1,Mu2)+Sig;
-                    Hgh=DShgh;
-                    Low=DSlow;
-            %Note Loc tells which Img we're in (1 for US, etc)
-                [r, c]=PxlRotate(Hgh,DSXpts(i),size(DSmean1),-Ang2);
-                PDFs(1,i).Loc=2; PDFs(1,i).Xpix=c;  PDFs(1,i).Ypix=r; PDFs(1,i).Xnorm=Xpts(i); %PDFs(1,i).Ynorm=YDatDS(round(PDFs(1,i).Ypix));
-                [r, c]=PxlRotate(DStop,DSXpts(i),size(DSmean1),-Ang2);                           PDFs(1,i).Ynorm=1;
-                PDFs(2,i).Loc=2; PDFs(2,i).Xpix=c; PDFs(2,i).Ypix=r; PDFs(2,i).Xnorm=Xpts(i); %PDFs(2,i).Ynorm=YDatDS(round(PDFs(2,i).Ypix));
-                [r, c]=PxlRotate(DSmid,DSXpts(i),size(DSmean1),-Ang2);                           PDFs(2,i).Ynorm=0.5;
-                PDFs(3,i).Loc=2; PDFs(3,i).Xpix=c; PDFs(3,i).Ypix=r; PDFs(3,i).Xnorm=Xpts(i); %PDFs(3,i).Ynorm=YDatDS(round(PDFs(3,i).Ypix));
-                [r, c]=PxlRotate(DSbot,DSXpts(i),size(DSmean1),-Ang2);                           PDFs(3,i).Ynorm=0;
-                PDFs(4,i).Loc=2; PDFs(4,i).Xpix=c; PDFs(4,i).Ypix=r; PDFs(4,i).Xnorm=Xpts(i); %PDFs(4,i).Ynorm=YDatDS(round(PDFs(4,i).Ypix));
-                [r, c]=PxlRotate(Low,DSXpts(i),size(DSmean1),-Ang2);                             PDFs(4,i).Ynorm=-.5;
-                PDFs(5,i).Loc=2; PDFs(5,i).Xpix=c; PDFs(5,i).Ypix=r;   PDFs(5,i).Xnorm=Xpts(i); %PDFs(5,i).Ynorm=YDatDS(round(PDFs(5,i).Ypix));
-                                                                                                PDFs(5,i).Ynorm=-1;
-        end
+                r=hgh;c=Xpts(i);
+                PDFs(1,i).Loc=1; PDFs(1,i).Xpix=c; PDFs(1,i).Ypix=r; PDFs(1,i).Xnorm=Xs(c); PDFs(1,i).Ynorm=Ys(r);
+                r=top;c=Xpts(i);
+                PDFs(2,i).Loc=1; PDFs(2,i).Xpix=c; PDFs(2,i).Ypix=r; PDFs(2,i).Xnorm=Xs(c); PDFs(2,i).Ynorm=Ys(r);
+                r=mid;c=Xpts(i);
+                PDFs(3,i).Loc=1; PDFs(3,i).Xpix=c; PDFs(3,i).Ypix=r; PDFs(3,i).Xnorm=Xs(c); PDFs(3,i).Ynorm=Ys(r);
+                r=bot;c=Xpts(i);
+                PDFs(4,i).Loc=1; PDFs(4,i).Xpix=c; PDFs(4,i).Ypix=r; PDFs(4,i).Xnorm=Xs(c); PDFs(4,i).Ynorm=Ys(r);
+                r=low;c=Xpts(i);
+                PDFs(5,i).Loc=1; PDFs(5,i).Xpix=c; PDFs(5,i).Ypix=r; PDFs(5,i).Xnorm=Xs(c); PDFs(5,i).Ynorm=Ys(r);
+                
         %Draw Rectangles                                  
         for Y=1:5
             Xpt=PDFs(Y,i).Xnorm;
             Ypt=PDFs(Y,i).Ynorm;
             %Can Delete                Ypt=YDatUS(PDFptsUS(Y,i,2));
           %  subaxis(2,1,1,'Spacing', 0.02, 'Padding', 0.000, 'Margin', .02);
-                rectangle('Position',[(Xpt-BoxN(1)/2),Ypt-BoxN(2)/2,BoxN(1),BoxN(2)]);
+                rectangle('Position',[(Xpt-BoxN(2)/2),Ypt-BoxN(1)/2,BoxN(2),BoxN(1)]);
           %  subaxis(2,1,2,'Spacing', 0.02, 'Padding', 0.000, 'Margin', .02);
           %      rectangle('Position',[(Xpt-BoxN(1)/2),Ypt-BoxN(2)/2,BoxN(1),BoxN(2)]);
        end
@@ -209,19 +115,19 @@ load('Vars/PreRunVars','Scale');
             'PaperUnits','normalized',...
             'PaperType','tabloid',...
             'PaperPosition', [0 0 1 1]);
-    %[n,d] = rat(Expon);        
+    [n,d] = rat(Expon);        
     %print('-dpdf','-r500',['Vars/Eps' sprintf('%.3f', eps) '/' TitleTxt '_Locator_' num2str(n) '|' num2str(d) '.pdf'])
     
     %Clear some stuff to open some memory:
-    clear('C1C2','Cov','RMSE1','RMSE2','mean1','mean2','DSC1C2','DSCov','DSRMSE1','DSRMSE2','DSmean1','DSmean2','USC1C2','USCov','USRMSE1','USRMSE2','USmean1','USmean2');
+   % clear('C1C2','Cov','RMSE1','RMSE2','mean1','mean2','DSC1C2','DSCov','DSRMSE1','DSRMSE2','DSmean1','DSmean2','USC1C2','USCov','USRMSE1','USRMSE2','USmean1','USmean2');
 %% Now we need to find the actual PDFs  Need to format PDF2d to accomindate a matrix of X, Y pts (Should i consider 
 
-   [JPDFs]=PDF2d(Directory,[USstart DSstart],[USstop DSstop],PDFs,Box,eps);
+   [JPDFs]=PDF2d_grid(Directory,Start,Stop,PDFs,Box,eps);
    %load(['Vars/Eps' sprintf('%.3f', eps) '/PDF2d' sprintf('%05d', USstart) '-' sprintf('%05d', DSstop)], 'JPDFs');   %Proc Mean
   
 %% STEP 3: Plot that shoot.
 
-plotPDFs(USstart, USstop, DSstart,DSstop, eps, Expon, TitleTxt)
+plotPDFs_Grid(Start, Stop, eps, Expon, TitleTxt)
 
 end
 

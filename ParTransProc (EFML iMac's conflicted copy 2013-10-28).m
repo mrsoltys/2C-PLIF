@@ -44,8 +44,8 @@ Size=size(I1);
     AddCrop(3)=Cs(3)+AddCrop(3);
     AddCrop(4)=Cs(4)-AddCrop(4);
 disp(['Translating and Processing Imgs ' int2str(Start) '-' int2str(Stop)]);
-    %parfor i=Start:Stop
-    for i=Start:Stop
+    parfor i=Start:Stop
+    %for i=Start:Stop
             
         Name1=[Direct 'RawImgs/' C1Dir(i).name];
         Name2=[Direct 'RawImgs/' C2Dir(i).name];

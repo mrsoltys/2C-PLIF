@@ -33,7 +33,7 @@ function [JPDFs]=PDF2d(Direct, Start, Stop, JPDFs, Box, eps)
 %matlabpool open
 
 % Initilize Centers.  This also sets the length of the PDF
-Centers=linspace(0,1,125);
+Centers=linspace(0,1,500);
 %Centers=0:.01:1;
     Cs(1)={Centers};
     Cs(2)={Centers};
@@ -47,24 +47,22 @@ Centers=linspace(0,1,125);
 
 disp(['Finding 2D PDF for ' int2str(Start) '-' int2str(Stop)]);
 load([Direct 'ProcImgs/Proc' sprintf('%05d', Start(1))],'C1','C2')   %Proc Mean
-
+mean2=[];
 
 %% Start by running through each JPDF and initalizing it
-ind=1;
-while ind<=length(Start)
-    Str=Start(ind);Stp=Stop(ind);
-    %Load Means
-        load(['Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' sprintf('%05d', Start(ind)) '-' sprintf('%05d', Stop(ind))], 'mean1', 'mean2', 'RMSE1', 'RMSE2', 'Cov', 'C1C2');   
-        Mean1=mean1; Mean2=mean2;
-    %Load RMS
-    %    load([Direct 'Vars/Eps' sprintf('%.3f', eps) '/RMSEe' sprintf('%05d', Start(ind)) '-' sprintf('%05d', Stop(ind))], );   
-    %load Other Stats?
-    %    load([Direct 'Vars/Eps' sprintf('%.3f', eps) '/CovE' sprintf('%05d', Start(ind)) '-' sprintf('%05d', Stop(ind))], );   
+ MeanName=[ sprintf('%05d', Start(1)) '-'  sprintf('%05d', Stop(end))];
+        load(['Vars/Eps' sprintf('%.3f', eps) '/ProcMeansE' MeanName]);
+            Mean1=fliplr(mean1');Mean2=fliplr(mean2');
+            [USr USc]=size(Mean1);
+       % load(['Vars/Eps' sprintf('%.3f', eps) '/CovE' USMeanName]);
+            C1C2=fliplr(C1C2');Cov=fliplr(Cov');
+       % load(['Vars/Eps' sprintf('%.3f', eps) '/RMSEe' USMeanName]);
+            RMSE1=fliplr(RMSE1');RMSE2=fliplr(RMSE2');
+ 
     for X=1:Xs
         for Y=1:Ys
-            if(JPDFs(Y,X).Loc==ind) % check to make sure we're in the right image
                 % How many Counts will PDF have? 
-                JPDFs(Y,X).Ncounts=(Box(1)+1)*(Box(2)+1)*(Stp-Str+1);
+                JPDFs(Y,X).Ncounts=(Box(1)+1)*(Box(2)+1)*(sum(Stop-Start)+length(Start));
                 JPDFs(Y,X).JPDF=zeros(length(Centers), length(Centers));
                 
                 %Define Box that JPDF is defined for
@@ -80,11 +78,9 @@ while ind<=length(Start)
                 JPDFs(Y,X).RMSE2=mean(mean( RMSE2(b:t,l:r) ));
                 JPDFs(Y,X).Cov  =mean(mean(   Cov(b:t,l:r) )); %%?Is it RIGHT to average these over the box size?
                 JPDFs(Y,X).C1C2 =mean(mean(  C1C2(b:t,l:r) )); %%?Is it RIGHT to average these over the box size?
-            end
+        
         end
     end
-    ind=ind+1;
-end
 
 %Free up some memory...
 clear('Mean1','mean1','Mean2','mean2','RMSE1', 'RMSE2', 'Cov', 'C1C2');
@@ -101,8 +97,8 @@ i=Start(ind);
 while ind<=length(Start)
     for X=1:Xs
         for Y=1:Ys
-            if(JPDFs(Y,X).Loc==ind) % check to make sure we're in the right image              
                 load([Direct 'ProcImgs/Proc' sprintf('%05d', i)],'C1','C2');
+                C1=fliplr(C1');C2=fliplr(C2');
 
                 %Define Box that JPDF is defined for
                 l=round(JPDFs(Y,X).Xpix-Box(2)/2);
@@ -117,7 +113,6 @@ while ind<=length(Start)
                 % create histogram for each Box and add it to the JPDF
                 Hist(:,:)=hist3([C1s(:),C2s(:)],Cs);
                 JPDFs(Y,X).JPDF=JPDFs(Y,X).JPDF+Hist;
-            end
         end
     end
     
